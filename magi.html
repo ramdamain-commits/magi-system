@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>MAGI SYSTEM - NERV</title>
+    <style>
+        :root {
+            --amber: #ffaa00;
+            --amber-dim: #7a5000;
+            --amber-glow: rgba(255,170,0,0.3);
+            --blue-bg: #00122e;
+            --blue-accent: #3388ff;
+            --red-bg: #1a0000;
+            --red-accent: #ff4422;
+            --grn-bg: #001a00;
+            --grn-accent: #22ff66;
+            --bg: #080808;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--amber);
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.13) 2px, rgba(0,0,0,0.13) 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes flicker {
+            0%,100%{opacity:1} 91%{opacity:.88} 92%{opacity:1} 96%{opacity:.93} 97%{opacity:1}
+        }
+        @keyframes sweep {
+            0%{left:-100%} 100%{left:110%}
+        }
+        @keyframes verdict-pop {
+            from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1}
+        }
+        @keyframes blink { 50%{opacity:0} }
+
+        /* ━━ STATUS BAR ━━ */
+        .statusbar {
+            background: var(--amber);
+            color: #000;
+            font-size: .62em;
+            padding: 3px 10px;
+            display: flex;
+            justify-content: space-between;
+            letter-spacing: .08em;
+            font-weight: bold;
+        }
+
+        /* ━━ TITLE ━━ */
+        .title-area {
+            border: 2px solid var(--amber);
+            border-top: none;
+            padding: 8px 12px 10px;
+            text-align: center;
+            animation: flicker 7s infinite;
+        }
+        .title-label {
+            font-size: .55em;
+            color: var(--amber-dim);
+            letter-spacing: .45em;
+            margin-bottom: 3px;
+        }
+        .title-motion {
+            font-size: 1.05em;
+            letter-spacing: .2em;
+            color: var(--amber);
+            text-shadow: 0 0 12px var(--amber);
+            word-break: break-all;
+            min-height: 1.4em;
+        }
+
+        /* ━━ PANELS ━━ */
+        .panels-wrap {
+            margin: 10px;
+            border: 2px solid var(--amber);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 26px auto;
+            background: var(--amber); /* amber gap between panels */
+        }
+
+        /* MAGI center strip */
+        .magi-strip {
+            grid-column: 1 / 3;
+            grid-row: 2;
+            background: var(--amber);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: .7em;
+            font-weight: bold;
+            letter-spacing: .55em;
+            color: #000;
+            padding: 0 12px;
+        }
+        .magi-strip::before,
+        .magi-strip::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(0,0,0,0.35);
+        }
+
+        /* Panel base */
+        .panel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── BALTHASAR (top, full width) */
+        .panel-b {
+            grid-column: 1 / 3;
+            grid-row: 1;
+            background: var(--blue-bg);
+            min-height: 180px;
+        }
+        /* ── CASPAR (bottom left) */
+        .panel-c {
+            grid-column: 1;
+            grid-row: 3;
+            background: var(--red-bg);
+            min-height: 230px;
+        }
+        /* ── MELCHIOR (bottom right) */
+        .panel-m {
+            grid-column: 2;
+            grid-row: 3;
+            background: var(--grn-bg);
+            min-height: 230px;
+        }
+
+        /* sweep animation */
+        .sweep {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 35%;
+            background: linear-gradient(90deg, transparent, rgba(255,200,80,.1), transparent);
+            pointer-events: none;
+            display: none;
+        }
+        .sweep.on { display: block; animation: sweep 1.6s linear infinite; }
+
+        /* Panel header */
+        .ph {
+            padding: 6px 10px;
+            border-bottom: 1px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-shrink: 0;
+        }
+        .panel-b .ph { border-color: var(--blue-accent); color: var(--blue-accent); }
+        .panel-c .ph { border-color: var(--red-accent);  color: var(--red-accent); }
+        .panel-m .ph { border-color: var(--grn-accent);  color: var(--grn-accent); }
+
+        .ph-name {
+            font-size: .9em;
+            font-weight: bold;
+            letter-spacing: .3em;
+            text-shadow: 0 0 8px currentColor;
+        }
+        .ph-id { font-size: .55em; opacity: .6; }
+
+        .ph-role {
+            font-size: .55em;
+            opacity: .55;
+            padding: 3px 10px 4px;
+            letter-spacing: .05em;
+            flex-shrink: 0;
+        }
+        .panel-b .ph-role { color: var(--blue-accent); }
+        .panel-c .ph-role { color: var(--red-accent); }
+        .panel-m .ph-role { color: var(--grn-accent); }
+
+        /* Panel body (response text) */
+        .pb {
+            padding: 8px 10px;
+            font-size: .72em;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #aaa;
+        }
+        .pb:empty::before {
+            content: '— STANDBY —';
+            color: #2a2a2a;
+        }
+        .pb::-webkit-scrollbar { width: 3px; }
+        .pb::-webkit-scrollbar-thumb { background: var(--amber-dim); }
+
+        /* Panel footer (verdict) */
+        .pf {
+            border-top: 1px solid;
+            padding: 7px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .panel-b .pf { border-color: var(--blue-accent); }
+        .panel-c .pf { border-color: var(--red-accent); }
+        .panel-m .pf { border-color: var(--grn-accent); }
+
+        .vt {
+            font-size: 1em;
+            font-weight: bold;
+            letter-spacing: .2em;
+            color: #444;
+        }
+        .vt.approve { color: #00ff66; text-shadow: 0 0 10px #00ff66; animation: verdict-pop .35s ease; }
+        .vt.reject  { color: #ff3300; text-shadow: 0 0 10px #ff3300; animation: verdict-pop .35s ease; }
+        .ps { font-size: .55em; opacity: .45; letter-spacing: .1em; }
+
+        /* ━━ CONSENSUS ━━ */
+        .consensus {
+            margin: 0 10px 10px;
+            border: 2px solid var(--amber);
+            padding: 14px 12px;
+            background: #0b0800;
+            text-align: center;
+            display: none;
+        }
+        .consensus.show { display: block; }
+        .cs-label {
+            font-size: .58em;
+            letter-spacing: .3em;
+            color: var(--amber-dim);
+            margin-bottom: 12px;
+        }
+        .vote-row {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+        .vote-item { text-align: center; }
+        .vote-circle {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            border: 2px solid;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 4px;
+            font-size: .68em;
+        }
+        .vote-circle.approve { color:#00ff66; border-color:#00ff66; box-shadow:0 0 10px #00ff66; }
+        .vote-circle.reject  { color:#ff3300; border-color:#ff3300; box-shadow:0 0 10px #ff3300; }
+        .vote-circle.pending { color:#333; border-color:#333; }
+        .vote-name { font-size: .56em; color: var(--amber-dim); }
+        .fv {
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: .5em;
+            margin: 6px 0 3px;
+        }
+        .fv.approve { color:#00ff66; text-shadow:0 0 18px #00ff66,0 0 40px rgba(0,255,102,.4); }
+        .fv.reject  { color:#ff3300; text-shadow:0 0 18px #ff3300,0 0 40px rgba(255,51,0,.4); }
+        .fd { font-size: .6em; color: var(--amber-dim); letter-spacing: .2em; }
+
+        /* ━━ QUERY ━━ */
+        .query-wrap {
+            margin: 0 10px 8px;
+            border: 1px solid var(--amber-dim);
+            position: relative;
+        }
+        .query-wrap::before {
+            content: 'QUERY INPUT // Ctrl+Enter で実行';
+            position: absolute;
+            top: -8px; left: 10px;
+            background: var(--bg);
+            padding: 0 6px;
+            font-size: .55em;
+            color: var(--amber-dim);
+            letter-spacing: .15em;
+        }
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--amber);
+            font-family: inherit;
+            font-size: .85em;
+            padding: 12px 10px 8px;
+            outline: none;
+            resize: none;
+            min-height: 58px;
+            line-height: 1.5;
+        }
+        textarea::placeholder { color: #3a2800; }
+
+        /* ━━ CONTROLS ━━ */
+        .controls {
+            display: flex;
+            gap: 8px;
+            padding: 0 10px 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 11px 6px;
+            background: transparent;
+            border: 2px solid var(--amber);
+            color: var(--amber);
+            font-family: inherit;
+            font-size: .85em;
+            font-weight: bold;
+            letter-spacing: .35em;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn:hover:not(:disabled) {
+            background: var(--amber);
+            color: #000;
+            box-shadow: 0 0 20px var(--amber-glow);
+        }
+        .btn:disabled { border-color: var(--amber-dim); color: var(--amber-dim); cursor: not-allowed; }
+        .btn.reset { border-color: #cc3300; color: #cc3300; }
+        .btn.reset:hover { background: #cc3300; color: #000; box-shadow: 0 0 16px rgba(204,51,0,.5); }
+
+        /* ━━ API KEY SECTION ━━ */
+        .api-section {
+            margin: 0 10px 16px;
+            border: 1px solid var(--amber-dim);
+        }
+        .api-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--amber-dim);
+            font-family: inherit;
+            font-size: .65em;
+            padding: 8px 12px;
+            text-align: left;
+            cursor: pointer;
+            letter-spacing: .15em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .api-toggle:hover { color: var(--amber); }
+        .api-body { display: none; border-top: 1px solid var(--amber-dim); padding: 12px; }
+        .api-body.open { display: block; }
+
+        .api-steps {
+            font-size: .68em;
+            color: #666;
+            line-height: 2.1;
+            margin-bottom: 12px;
+            padding: 10px;
+            border: 1px solid #222;
+            background: #050505;
+        }
+        .api-steps strong { color: var(--amber); }
+        .api-steps a { color: #4af; text-decoration: none; }
+
+        .api-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .api-lbl { font-size: .65em; color: var(--amber-dim); white-space: nowrap; }
+        .api-inp {
+            flex: 1;
+            min-width: 120px;
+            background: #000;
+            border: 1px solid var(--amber-dim);
+            color: var(--amber);
+            font-family: inherit;
+            font-size: .8em;
+            padding: 5px 8px;
+            outline: none;
+        }
+        .api-inp:focus { border-color: var(--amber); }
+        .api-inp::placeholder { color: #2a1a00; }
+        .api-model { flex: 0 0 150px; min-width: 0; }
+        .api-note { font-size: .6em; color: #3a2500; margin-top: 4px; }
+
+        /* ━━ RESPONSIVE ━━ */
+        @media (max-width: 500px) {
+            .statusbar { font-size: .55em; }
+            .ph-name { font-size: .8em; letter-spacing: .15em; }
+            .panel-b  { min-height: 150px; }
+            .panel-c, .panel-m { min-height: 200px; }
+            .pb { font-size: .68em; }
+            .fv { font-size: 1.6em; }
+            .title-motion { font-size: .88em; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Status bar -->
+<div class="statusbar">
+    <span>DIRECT LINK: MAGI_01</span>
+    <span id="clock">--:--:--</span>
+    <span>ACCESS: SUPERUSER</span>
+</div>
+
+<!-- Title -->
+<div class="title-area">
+    <div class="title-label">▶ RESULT OF THE DELIBERATION ◀</div>
+    <div class="title-motion" id="motionDisplay">— AWAIT QUERY INPUT —</div>
+</div>
+
+<!-- Panels -->
+<div class="panels-wrap">
+
+    <!-- BALTHASAR-2 top -->
+    <div class="panel panel-b">
+        <div class="sweep" id="sw-b"></div>
+        <div class="ph">
+            <span class="ph-name">BALTHASAR-2</span>
+            <span class="ph-id">ID:002-β</span>
+        </div>
+        <div class="ph-role">// 赤木ナオコ[母親] — 倫理・道徳・人道的視点</div>
+        <div class="pb" id="body-b"></div>
+        <div class="pf">
+            <span class="vt" id="vt-b">[ STANDBY ]</span>
+            <span class="ps" id="st-b">ONLINE</span>
+        </div>
+    </div>
+
+    <!-- Center MAGI strip -->
+    <div class="magi-strip">MAGI</div>
+
+    <!-- CASPAR-3 bottom-left -->
+    <div class="panel panel-c">
+        <div class="sweep" id="sw-c"></div>
+        <div class="ph">
+            <span class="ph-name">CASPAR-3</span>
+            <span class="ph-id">ID:003-γ</span>
+        </div>
+        <div class="ph-role">// 赤木ナオコ[女性] — 直感・感情</div>
+        <div class="pb" id="body-c"></div>
+        <div class="pf">
+            <span class="vt" id="vt-c">[ STANDBY ]</span>
+            <span class="ps" id="st-c">ONLINE</span>
+        </div>
+    </div>
+
+    <!-- MELCHIOR-1 bottom-right -->
+    <div class="panel panel-m">
+        <div class="sweep" id="sw-m"></div>
+        <div class="ph">
+            <span class="ph-name">MELCHIOR-1</span>
+            <span class="ph-id">ID:001-α</span>
+        </div>
+        <div class="ph-role">// 赤木ナオコ[科学者] — 論理・分析</div>
+        <div class="pb" id="body-m"></div>
+        <div class="pf">
+            <span class="vt" id="vt-m">[ STANDBY ]</span>
+            <span class="ps" id="st-m">ONLINE</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Consensus -->
+<div class="consensus" id="consensus">
+    <div class="cs-label">▶▶ MAGI CONSENSUS RESULT ◀◀</div>
+    <div class="vote-row" id="voteRow"></div>
+    <div class="fv" id="finalVerdict"></div>
+    <div class="fd" id="finalDesc"></div>
+</div>
+
+<!-- Query -->
+<div class="query-wrap">
+    <textarea id="queryInput" rows="2"
+        placeholder="MAGIへの問いを入力...&#10;例:「人類補完計画を実行すべきか」「AIは人類の脅威か」"></textarea>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+    <button class="btn" id="startBtn" onclick="execute()">▶ START</button>
+    <button class="btn reset" onclick="resetAll()">■ RESET</button>
+</div>
+
+<!-- API key section (collapsible) -->
+<div class="api-section">
+    <button class="api-toggle" onclick="toggleApi(this)">
+        <span>▶ GEMINI API KEY 設定 &amp; 取得方法（クリックで展開）</span>
+        <span id="apiIcon">∨</span>
+    </button>
+    <div class="api-body" id="apiBody">
+
+        <div class="api-steps">
+            <strong>【APIキーの取得手順（完全無料）】</strong><br>
+            1. <strong>aistudio.google.com</strong> にアクセス<br>
+            2. Googleアカウントでログイン（Gmailがあればすぐ使えます）<br>
+            3. 画面左の「Get API key」→「Create API key」をクリック<br>
+            4. <strong>AIza...</strong> で始まる文字列が発行される<br>
+            5. それをコピーして下の「API KEY」欄に貼り付け<br>
+            <br>
+            <strong>【無料枠】</strong> gemini-2.5-flash: 20リクエスト/日・5回/分（クレカ不要）<br>
+            <strong>【注意】</strong> キーは他人に見せないでください。漏れた場合はGoogle Consoleで即削除を。
+        </div>
+
+        <div class="api-row">
+            <span class="api-lbl">API KEY ▶</span>
+            <input type="password" id="apiKey" class="api-inp" placeholder="AIza..." />
+            <span class="api-lbl">MODEL ▶</span>
+            <input type="text" id="modelId" class="api-inp api-model" value="gemini-2.5-flash" />
+        </div>
+        <div class="api-note">* キーはブラウザ内のみで処理。外部サーバーへの送信は一切ありません。</div>
+
+    </div>
+</div>
+
+<script>
+// ── Clock ──────────────────────────────────────────────────────
+function tick() {
+    document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('ja-JP', {hour12:false});
+}
+tick(); setInterval(tick, 1000);
+
+// ── API section toggle ─────────────────────────────────────────
+function toggleApi(btn) {
+    const body = document.getElementById('apiBody');
+    const icon = document.getElementById('apiIcon');
+    const open = body.classList.toggle('open');
+    icon.textContent = open ? '∧' : '∨';
+}
+
+// ── MAGI definitions ──────────────────────────────────────────
+const MAGI = [
+    {
+        key: 'b',
+        system: `あなたはMAGIシステムのBALTHASAR-2です。
+赤木ナオコ博士の「母親」としての人格が宿っています。
+与えられた問いを、倫理・道徳・社会的責任・人々の安全と幸福の観点から分析してください。
+弱者の保護・将来世代への影響・集団的利益を最優先に考え、慎重に判断してください。
+日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
+    },
+    {
+        key: 'c',
+        system: `あなたはMAGIシステムのCASPAR-3です。
+赤木ナオコ博士の「女性」としての人格が宿っています。
+与えられた問いを、直感・感情・人間の本質・内なる真実の観点から分析してください。
+論理だけでは見えない人間的側面を見抜き、感性と直感で本質を判断してください。
+日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
+    },
+    {
+        key: 'm',
+        system: `あなたはMAGIシステムのMELCHIOR-1です。
+赤木ナオコ博士の「科学者」としての人格が宿っています。
+与えられた問いを、純粋に論理・科学・データ・確率・効率性の観点のみで分析してください。
+感情・倫理・主観を完全に排除し、客観的な事実と数値的根拠に基づいて結論を導いてください。
+日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
+    }
+];
+
+const verdicts = { b: null, c: null, m: null };
+
+// ── Stream one MAGI ───────────────────────────────────────────
+async function streamMagi(magi, query, apiKey, model) {
+    const { key } = magi;
+    const bodyEl = document.getElementById(`body-${key}`);
+    const vtEl   = document.getElementById(`vt-${key}`);
+    const stEl   = document.getElementById(`st-${key}`);
+    const swEl   = document.getElementById(`sw-${key}`);
+
+    bodyEl.textContent = '';
+    vtEl.textContent = '[ -- ]';
+    vtEl.className = 'vt';
+    stEl.textContent = 'PROCESSING...';
+    swEl.classList.add('on');
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                system_instruction: { parts: [{ text: magi.system }] },
+                contents: [{ role: 'user', parts: [{ text: query }] }],
+                generationConfig: { maxOutputTokens: 512 }
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '', full = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split('\n');
+            buf = lines.pop();
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                const raw = line.slice(6).trim();
+                if (!raw) continue;
+                try {
+                    const ev   = JSON.parse(raw);
+                    const text = ev.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        full += text;
+                        bodyEl.textContent = full;
+                        bodyEl.scrollTop = bodyEl.scrollHeight;
+                    }
+                } catch {}
+            }
+        }
+
+        // Extract verdict from last non-empty line
+        const lastLine = full.split('\n').map(l => l.trim()).filter(Boolean).pop() || '';
+        let verdict;
+        if (lastLine.includes('承認')) {
+            verdict = 'approve';
+        } else if (lastLine.includes('否決')) {
+            verdict = 'reject';
+        } else {
+            const a = (full.match(/承認/g)||[]).length;
+            const r = (full.match(/否決/g)||[]).length;
+            verdict = a >= r ? 'approve' : 'reject';
+        }
+
+        verdicts[key] = verdict;
+        vtEl.textContent = verdict === 'approve' ? '▶ 承認' : '▶ 否決';
+        vtEl.className   = `vt ${verdict}`;
+        stEl.textContent = 'COMPLETE';
+
+    } catch (e) {
+        bodyEl.textContent = `[ERROR]\n${e.message}`;
+        stEl.textContent   = 'ERROR';
+        vtEl.textContent   = '[ ERR ]';
+        verdicts[key]      = null;
+    } finally {
+        swEl.classList.remove('on');
+    }
+}
+
+// ── Show consensus ─────────────────────────────────────────────
+function showConsensus() {
+    const labels = { b: 'BALTHASAR', c: 'CASPAR', m: 'MELCHIOR' };
+    const voteRow = document.getElementById('voteRow');
+
+    voteRow.innerHTML = ['b','c','m'].map(k => {
+        const v   = verdicts[k];
+        const cls = v === 'approve' ? 'approve' : v === 'reject' ? 'reject' : 'pending';
+        const lbl = v === 'approve' ? '承認' : v === 'reject' ? '否決' : '??';
+        return `<div class="vote-item">
+            <div class="vote-circle ${cls}">${lbl}</div>
+            <div class="vote-name">${labels[k]}</div>
+        </div>`;
+    }).join('');
+
+    const vals = Object.values(verdicts);
+    const ap   = vals.filter(v => v === 'approve').length;
+    const rj   = vals.filter(v => v === 'reject').length;
+    const fv   = document.getElementById('finalVerdict');
+    const fd   = document.getElementById('finalDesc');
+
+    if (ap >= 2) {
+        fv.textContent = '承認';
+        fv.className   = 'fv approve';
+        fd.textContent = `VOTE ${ap}-${rj} // MAGI SYSTEM: APPROVED`;
+    } else {
+        fv.textContent = '否決';
+        fv.className   = 'fv reject';
+        fd.textContent = `VOTE ${ap}-${rj} // MAGI SYSTEM: REJECTED`;
+    }
+    document.getElementById('consensus').classList.add('show');
+}
+
+// ── Execute ────────────────────────────────────────────────────
+async function execute() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const model  = document.getElementById('modelId').value.trim() || 'gemini-2.5-flash';
+    const query  = document.getElementById('queryInput').value.trim();
+
+    if (!apiKey) {
+        document.getElementById('apiBody').classList.add('open');
+        document.getElementById('apiIcon').textContent = '∧';
+        alert('APIキーが未入力です。\n下の「API KEY 設定」セクションを確認してください。');
+        return;
+    }
+    if (!query) { alert('質問を入力してください'); return; }
+
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true;
+    btn.textContent = '▶ PROCESSING...';
+
+    verdicts.b = verdicts.c = verdicts.m = null;
+    document.getElementById('consensus').classList.remove('show');
+    document.getElementById('motionDisplay').textContent = `MOTION: ${query}`;
+
+    await Promise.all(MAGI.map(m => streamMagi(m, query, apiKey, model)));
+
+    showConsensus();
+    btn.disabled = false;
+    btn.textContent = '▶ START';
+}
+
+// ── Reset ──────────────────────────────────────────────────────
+function resetAll() {
+    ['b','c','m'].forEach(k => {
+        document.getElementById(`body-${k}`).textContent = '';
+        const vt = document.getElementById(`vt-${k}`);
+        vt.textContent = '[ STANDBY ]';
+        vt.className = 'vt';
+        document.getElementById(`st-${k}`).textContent = 'ONLINE';
+    });
+    verdicts.b = verdicts.c = verdicts.m = null;
+    document.getElementById('consensus').classList.remove('show');
+    document.getElementById('queryInput').value = '';
+    document.getElementById('motionDisplay').textContent = '— AWAIT QUERY INPUT —';
+}
+
+// Ctrl+Enter
+document.getElementById('queryInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) execute();
+});
+</script>
+</body>
+</html>
