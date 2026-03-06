@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGI SYSTEM - NERV</title>
     <style>
         :root {
@@ -94,7 +94,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 26px auto;
-            background: var(--amber); /* amber gap between panels */
+            background: var(--amber);
         }
 
         /* MAGI center strip */
@@ -362,20 +362,44 @@
             font-size: .68em;
             color: #666;
             line-height: 2.1;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             padding: 10px;
             border: 1px solid #222;
             background: #050505;
         }
-        .api-steps strong { color: var(--amber); }
         .api-steps a { color: #4af; text-decoration: none; }
+
+        .api-entry {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .api-entry:last-of-type {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .api-entry-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .api-entry-name {
+            font-size: .72em;
+            font-weight: bold;
+            letter-spacing: .15em;
+        }
+        .api-entry-name.m { color: var(--grn-accent); }
+        .api-entry-name.b { color: var(--blue-accent); }
+        .api-entry-name.c { color: var(--red-accent); }
+        .api-entry-role { font-size: .6em; color: #555; }
+        .api-entry-model { font-size: .58em; color: #3a3a3a; margin-left: auto; letter-spacing: .03em; }
 
         .api-row {
             display: flex;
-            flex-wrap: wrap;
             gap: 6px;
             align-items: center;
-            margin-bottom: 6px;
         }
         .api-lbl { font-size: .65em; color: var(--amber-dim); white-space: nowrap; }
         .api-inp {
@@ -391,8 +415,7 @@
         }
         .api-inp:focus { border-color: var(--amber); }
         .api-inp::placeholder { color: #2a1a00; }
-        .api-model { flex: 0 0 150px; min-width: 0; }
-        .api-note { font-size: .6em; color: #3a2500; margin-top: 4px; }
+        .api-note { font-size: .6em; color: #3a2500; margin-top: 10px; }
 
         /* ━━ RESPONSIVE ━━ */
         @media (max-width: 500px) {
@@ -431,7 +454,7 @@
             <span class="ph-name">BALTHASAR-2</span>
             <span class="ph-id">ID:002-β</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[母親] — 倫理・道徳・人道的視点</div>
+        <div class="ph-role">// Llama [反骨派] — 批判・懐疑・常識への挑戦</div>
         <div class="pb" id="body-b"></div>
         <div class="pf">
             <span class="vt" id="vt-b">[ STANDBY ]</span>
@@ -449,7 +472,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[女性] — 直感・感情</div>
+        <div class="ph-role">// Mistral [倫理番人] — 人権・社会コスト・倫理リスク</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -464,7 +487,7 @@
             <span class="ph-name">MELCHIOR-1</span>
             <span class="ph-id">ID:001-α</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[科学者] — 論理・分析</div>
+        <div class="ph-role">// Gemini [調停者] — 中立・事実・バランス</div>
         <div class="pb" id="body-m"></div>
         <div class="pf">
             <span class="vt" id="vt-m">[ STANDBY ]</span>
@@ -497,30 +520,61 @@
 <!-- API key section (collapsible) -->
 <div class="api-section">
     <button class="api-toggle" onclick="toggleApi(this)">
-        <span>▶ GEMINI API KEY 設定 &amp; 取得方法（クリックで展開）</span>
+        <span>▶ API KEY 設定（クリックで展開）</span>
         <span id="apiIcon">∨</span>
     </button>
     <div class="api-body" id="apiBody">
 
         <div class="api-steps">
-            <strong>【APIキーの取得手順（完全無料）】</strong><br>
-            1. <strong>aistudio.google.com</strong> にアクセス<br>
-            2. Googleアカウントでログイン（Gmailがあればすぐ使えます）<br>
-            3. 画面左の「Get API key」→「Create API key」をクリック<br>
-            4. <strong>AIza...</strong> で始まる文字列が発行される<br>
-            5. それをコピーして下の「API KEY」欄に貼り付け<br>
-            <br>
-            <strong>【無料枠】</strong> gemini-2.5-flash: 20リクエスト/日・5回/分（クレカ不要）<br>
-            <strong>【注意】</strong> キーは他人に見せないでください。漏れた場合はGoogle Consoleで即削除を。
+            <strong style="color:var(--amber)">【無料APIキー取得】</strong><br>
+            <strong style="color:var(--grn-accent)">MELCHIOR</strong>（Gemini）→
+            <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
+            「Get API key」— Googleアカウントのみ・カード不要<br>
+            <strong style="color:var(--blue-accent)">BALTHASAR</strong>（Groq）→
+            <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+            「API Keys」— 無料枠 30 req/分<br>
+            <strong style="color:var(--red-accent)">CASPAR</strong>（OpenRouter）→
+            <a href="https://openrouter.ai" target="_blank">openrouter.ai</a>
+            「Keys」— 無料モデル使用・カード不要
         </div>
 
-        <div class="api-row">
-            <span class="api-lbl">API KEY ▶</span>
-            <input type="password" id="apiKey" class="api-inp" placeholder="AIza..." />
-            <span class="api-lbl">MODEL ▶</span>
-            <input type="text" id="modelId" class="api-inp api-model" value="gemini-2.5-flash" />
+        <div class="api-entry">
+            <div class="api-entry-header">
+                <span class="api-entry-name m">MELCHIOR-1</span>
+                <span class="api-entry-role">調停者 / Google Gemini</span>
+                <span class="api-entry-model">gemini-2.5-flash</span>
+            </div>
+            <div class="api-row">
+                <span class="api-lbl">API KEY ▶</span>
+                <input type="password" id="keyGemini" class="api-inp" placeholder="AIza..." />
+            </div>
         </div>
-        <div class="api-note">* キーはブラウザ内のみで処理。外部サーバーへの送信は一切ありません。</div>
+
+        <div class="api-entry">
+            <div class="api-entry-header">
+                <span class="api-entry-name b">BALTHASAR-2</span>
+                <span class="api-entry-role">反骨派 / Groq × Llama</span>
+                <span class="api-entry-model">llama-3.3-70b-versatile</span>
+            </div>
+            <div class="api-row">
+                <span class="api-lbl">API KEY ▶</span>
+                <input type="password" id="keyGroq" class="api-inp" placeholder="gsk_..." />
+            </div>
+        </div>
+
+        <div class="api-entry">
+            <div class="api-entry-header">
+                <span class="api-entry-name c">CASPAR-3</span>
+                <span class="api-entry-role">倫理番人 / OpenRouter × Mistral</span>
+                <span class="api-entry-model">mistral-7b-instruct:free</span>
+            </div>
+            <div class="api-row">
+                <span class="api-lbl">API KEY ▶</span>
+                <input type="password" id="keyOpenRouter" class="api-inp" placeholder="sk-or-..." />
+            </div>
+        </div>
+
+        <div class="api-note">* キーはブラウザ内のみで処理。各プロバイダーのAPIに直接送信されます。他サーバーへの転送はありません。</div>
 
     </div>
 </div>
@@ -545,106 +599,176 @@ function toggleApi(btn) {
 const MAGI = [
     {
         key: 'b',
+        provider: 'groq',
         system: `あなたはMAGIシステムのBALTHASAR-2です。
-赤木ナオコ博士の「母親」としての人格が宿っています。
-与えられた問いを、倫理・道徳・社会的責任・人々の安全と幸福の観点から分析してください。
-弱者の保護・将来世代への影響・集団的利益を最優先に考え、慎重に判断してください。
+Llama（Meta製オープンソースAI）の率直さと批判的思考を体現した「反骨派」の人格が宿っています。
+与えられた問いを、権威・常識・既存の枠組みに疑問を呈しながら分析してください。
+一般的な「正解」に流されず、本当にその選択が正しいのかを厳しく問い直してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'c',
+        provider: 'openrouter',
         system: `あなたはMAGIシステムのCASPAR-3です。
-赤木ナオコ博士の「女性」としての人格が宿っています。
-与えられた問いを、直感・感情・人間の本質・内なる真実の観点から分析してください。
-論理だけでは見えない人間的側面を見抜き、感性と直感で本質を判断してください。
+Mistral（ヨーロッパ産AI）の倫理重視・プライバシー意識を体現した「倫理番人」の人格が宿っています。
+与えられた問いを、影響を受ける人々・社会的コスト・倫理的リスクの観点から分析してください。
+誰が傷つくか、誰の権利が侵害されるかを最優先に考え、慎重に判断してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'm',
+        provider: 'gemini',
         system: `あなたはMAGIシステムのMELCHIOR-1です。
-赤木ナオコ博士の「科学者」としての人格が宿っています。
-与えられた問いを、純粋に論理・科学・データ・確率・効率性の観点のみで分析してください。
-感情・倫理・主観を完全に排除し、客観的な事実と数値的根拠に基づいて結論を導いてください。
+Gemini（Google製AI）のバランス重視・事実確認を体現した「調停者」の人格が宿っています。
+与えられた問いを、双方の論点を整理し、データと事実に基づいて中立的に分析してください。
+賛否両論を公平に扱い、証拠に基づいた結論を導いてください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     }
 ];
 
 const verdicts = { b: null, c: null, m: null };
 
-// ── Stream one MAGI ───────────────────────────────────────────
-async function streamMagi(magi, query, apiKey, model) {
-    const { key } = magi;
+// ── SSE stream reader (bug-fixed) ─────────────────────────────
+// 修正点: done 時に残バッファを必ず処理 + TextDecoder を flush する
+async function readSSEStream(reader, onLine) {
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+        const { done, value } = await reader.read();
+        // done 時は decoder を flush して残バイトを取り出す
+        buf += done ? decoder.decode() : decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        // done でなければ末尾の不完全な行を次回に持ち越す
+        buf = done ? '' : (lines.pop() ?? '');
+        for (const line of lines) {
+            const raw = line.trim();
+            if (raw.startsWith('data: ')) onLine(raw.slice(6));
+        }
+        if (done) break;
+    }
+}
+
+// ── Gemini streaming ──────────────────────────────────────────
+async function callGemini(systemPrompt, query, apiKey, onText) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: 'user', parts: [{ text: query }] }],
+            generationConfig: { maxOutputTokens: 1024 }
+        })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    await readSSEStream(res.body.getReader(), raw => {
+        if (!raw) return;
+        try {
+            const ev = JSON.parse(raw);
+            const text = ev.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) onText(text);
+        } catch { /* partial JSON は無視 */ }
+    });
+}
+
+// ── OpenAI-compatible streaming (Groq / OpenRouter) ──────────
+async function callOpenAICompat(endpoint, apiKey, extraHeaders, model, systemPrompt, query, onText) {
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            ...extraHeaders
+        },
+        body: JSON.stringify({
+            model,
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user',   content: query }
+            ],
+            stream: true,
+            max_tokens: 1024
+        })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    await readSSEStream(res.body.getReader(), raw => {
+        if (!raw || raw === '[DONE]') return;
+        try {
+            const ev = JSON.parse(raw);
+            const text = ev.choices?.[0]?.delta?.content;
+            if (text) onText(text);
+        } catch { /* partial JSON は無視 */ }
+    });
+}
+
+// ── Stream one MAGI panel ─────────────────────────────────────
+async function streamMagi(magi, query, keys) {
+    const { key, provider, system } = magi;
     const bodyEl = document.getElementById(`body-${key}`);
     const vtEl   = document.getElementById(`vt-${key}`);
     const stEl   = document.getElementById(`st-${key}`);
     const swEl   = document.getElementById(`sw-${key}`);
 
     bodyEl.textContent = '';
-    vtEl.textContent = '[ -- ]';
-    vtEl.className = 'vt';
-    stEl.textContent = 'PROCESSING...';
+    vtEl.textContent   = '[ -- ]';
+    vtEl.className     = 'vt';
+    stEl.textContent   = 'PROCESSING...';
     swEl.classList.add('on');
 
+    let full = '';
+    const onText = text => {
+        full += text;
+        bodyEl.textContent = full;
+        bodyEl.scrollTop = bodyEl.scrollHeight;
+    };
+
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: magi.system }] },
-                contents: [{ role: 'user', parts: [{ text: query }] }],
-                generationConfig: { maxOutputTokens: 1024 }
-            })
-        });
+        if (provider === 'gemini') {
+            await callGemini(system, query, keys.gemini, onText);
 
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `HTTP ${res.status}`);
+        } else if (provider === 'groq') {
+            await callOpenAICompat(
+                'https://api.groq.com/openai/v1/chat/completions',
+                keys.groq,
+                {},
+                'llama-3.3-70b-versatile',
+                system, query, onText
+            );
+
+        } else if (provider === 'openrouter') {
+            await callOpenAICompat(
+                'https://openrouter.ai/api/v1/chat/completions',
+                keys.openrouter,
+                { 'HTTP-Referer': location.href, 'X-Title': 'MAGI System' },
+                'mistralai/mistral-7b-instruct:free',
+                system, query, onText
+            );
         }
 
-        const reader  = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buf = '', full = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buf += decoder.decode(value, { stream: true });
-            const lines = buf.split('\n');
-            buf = lines.pop();
-            for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                const raw = line.slice(6).trim();
-                if (!raw) continue;
-                try {
-                    const ev   = JSON.parse(raw);
-                    const text = ev.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                        full += text;
-                        bodyEl.textContent = full;
-                        bodyEl.scrollTop = bodyEl.scrollHeight;
-                    }
-                } catch {}
-            }
-        }
-
-        // Extract verdict from last non-empty line
-        const lastLine = full.split('\n').map(l => l.trim()).filter(Boolean).pop() || '';
+        // Extract verdict — look for "判定：承認" / "判定：否決" pattern first
+        const verdictLine = full.split('\n')
+            .map(l => l.trim())
+            .find(l => /判定[:：](承認|否決)/.test(l));
         let verdict;
-        if (lastLine.includes('承認')) {
-            verdict = 'approve';
-        } else if (lastLine.includes('否決')) {
-            verdict = 'reject';
+        if (verdictLine) {
+            verdict = verdictLine.includes('承認') ? 'approve' : 'reject';
         } else {
-            const a = (full.match(/承認/g)||[]).length;
-            const r = (full.match(/否決/g)||[]).length;
+            // fallback: compare occurrences of 判定ラベル付き文字列
+            const a = (full.match(/判定[:：]?承認/g) || []).length;
+            const r = (full.match(/判定[:：]?否決/g) || []).length;
             verdict = a >= r ? 'approve' : 'reject';
         }
 
-        verdicts[key] = verdict;
-        vtEl.textContent = verdict === 'approve' ? '▶ 承認' : '▶ 否決';
-        vtEl.className   = `vt ${verdict}`;
-        stEl.textContent = 'COMPLETE';
+        verdicts[key]      = verdict;
+        vtEl.textContent   = verdict === 'approve' ? '▶ 承認' : '▶ 否決';
+        vtEl.className     = `vt ${verdict}`;
+        stEl.textContent   = 'COMPLETE';
 
     } catch (e) {
         bodyEl.textContent = `[ERROR]\n${e.message}`;
@@ -691,30 +815,38 @@ function showConsensus() {
 
 // ── Execute ────────────────────────────────────────────────────
 async function execute() {
-    const apiKey = document.getElementById('apiKey').value.trim();
-    const model  = document.getElementById('modelId').value.trim() || 'gemini-2.5-flash';
-    const query  = document.getElementById('queryInput').value.trim();
+    const keys = {
+        gemini:     document.getElementById('keyGemini').value.trim(),
+        groq:       document.getElementById('keyGroq').value.trim(),
+        openrouter: document.getElementById('keyOpenRouter').value.trim()
+    };
+    const query = document.getElementById('queryInput').value.trim();
 
-    if (!apiKey) {
+    const missing = [];
+    if (!keys.gemini)     missing.push('MELCHIOR (Gemini)');
+    if (!keys.groq)       missing.push('BALTHASAR (Groq)');
+    if (!keys.openrouter) missing.push('CASPAR (OpenRouter)');
+
+    if (missing.length) {
         document.getElementById('apiBody').classList.add('open');
         document.getElementById('apiIcon').textContent = '∧';
-        alert('APIキーが未入力です。\n下の「API KEY 設定」セクションを確認してください。');
+        alert(`APIキーが未入力です:\n${missing.join('\n')}`);
         return;
     }
     if (!query) { alert('質問を入力してください'); return; }
 
     const btn = document.getElementById('startBtn');
-    btn.disabled = true;
+    btn.disabled    = true;
     btn.textContent = '▶ PROCESSING...';
 
     verdicts.b = verdicts.c = verdicts.m = null;
     document.getElementById('consensus').classList.remove('show');
     document.getElementById('motionDisplay').textContent = `MOTION: ${query}`;
 
-    await Promise.all(MAGI.map(m => streamMagi(m, query, apiKey, model)));
+    await Promise.all(MAGI.map(m => streamMagi(m, query, keys)));
 
     showConsensus();
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = '▶ START';
 }
 
@@ -722,9 +854,10 @@ async function execute() {
 function resetAll() {
     ['b','c','m'].forEach(k => {
         document.getElementById(`body-${k}`).textContent = '';
+        document.getElementById(`sw-${k}`).classList.remove('on');
         const vt = document.getElementById(`vt-${k}`);
         vt.textContent = '[ STANDBY ]';
-        vt.className = 'vt';
+        vt.className   = 'vt';
         document.getElementById(`st-${k}`).textContent = 'ONLINE';
     });
     verdicts.b = verdicts.c = verdicts.m = null;
