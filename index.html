@@ -472,7 +472,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// Mistral [倫理番人] — 人権・社会コスト・倫理リスク</div>
+        <div class="ph-role">// Llama [倫理番人] — 人権・社会コスト・倫理リスク</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -530,19 +530,17 @@
             <strong style="color:var(--grn-accent)">MELCHIOR</strong>（Gemini）→
             <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
             「Get API key」— Googleアカウントのみ・カード不要<br>
-            <strong style="color:var(--blue-accent)">BALTHASAR</strong>（Groq）→
+            <strong style="color:var(--blue-accent)">BALTHASAR / CASPAR</strong>（Groq）→
             <a href="https://console.groq.com" target="_blank">console.groq.com</a>
-            「API Keys」— 無料枠 30 req/分<br>
-            <strong style="color:var(--red-accent)">CASPAR</strong>（OpenRouter）→
-            <a href="https://openrouter.ai" target="_blank">openrouter.ai</a>
-            「Keys」— 無料モデル使用・カード不要
+            「API Keys」— 無料プランの上限は Console 表示を確認<br>
+            <strong style="color:var(--red-accent)">CASPAR</strong> は上の Groq キーを共用
         </div>
 
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name m">MELCHIOR-1</span>
                 <span class="api-entry-role">調停者 / Google Gemini</span>
-                <span class="api-entry-model">gemini-2.5-flash</span>
+                <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
                 <span class="api-lbl">API KEY ▶</span>
@@ -554,7 +552,7 @@
             <div class="api-entry-header">
                 <span class="api-entry-name b">BALTHASAR-2</span>
                 <span class="api-entry-role">反骨派 / Groq × Llama</span>
-                <span class="api-entry-model">llama-3.3-70b-versatile</span>
+                <span class="api-entry-model">llama-3.1-8b-instant</span>
             </div>
             <div class="api-row">
                 <span class="api-lbl">API KEY ▶</span>
@@ -565,12 +563,12 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name c">CASPAR-3</span>
-                <span class="api-entry-role">倫理番人 / OpenRouter × Mistral</span>
-                <span class="api-entry-model">mistral-7b-instruct:free</span>
+                <span class="api-entry-role">倫理番人 / Groq × Llama</span>
+                <span class="api-entry-model">llama-3.1-8b-instant</span>
             </div>
             <div class="api-row">
-                <span class="api-lbl">API KEY ▶</span>
-                <input type="password" id="keyOpenRouter" class="api-inp" placeholder="sk-or-..." />
+                <span class="api-lbl">SHARED ▶</span>
+                <input type="text" class="api-inp" value="BALTHASAR の Groq キーを使用" readonly />
             </div>
         </div>
 
@@ -596,6 +594,9 @@ function toggleApi(btn) {
 }
 
 // ── MAGI definitions ──────────────────────────────────────────
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GROQ_MODEL = 'llama-3.1-8b-instant';
+
 const MAGI = [
     {
         key: 'b',
@@ -608,9 +609,9 @@ Llama（Meta製オープンソースAI）の率直さと批判的思考を体現
     },
     {
         key: 'c',
-        provider: 'openrouter',
+        provider: 'groq',
         system: `あなたはMAGIシステムのCASPAR-3です。
-Mistral（ヨーロッパ産AI）の倫理重視・プライバシー意識を体現した「倫理番人」の人格が宿っています。
+Llama（Groq経由）の倫理重視・プライバシー意識を体現した「倫理番人」の人格が宿っています。
 与えられた問いを、影響を受ける人々・社会的コスト・倫理的リスクの観点から分析してください。
 誰が傷つくか、誰の権利が侵害されるかを最優先に考え、慎重に判断してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
@@ -648,9 +649,15 @@ async function readSSEStream(reader, onLine) {
     }
 }
 
+function extractGeminiText(event) {
+    return (event.candidates?.[0]?.content?.parts ?? [])
+        .map(part => part.text ?? '')
+        .join('');
+}
+
 // ── Gemini streaming ──────────────────────────────────────────
 async function callGemini(systemPrompt, query, apiKey, onText) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?key=${apiKey}&alt=sse`;
     const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -668,13 +675,13 @@ async function callGemini(systemPrompt, query, apiKey, onText) {
         if (!raw) return;
         try {
             const ev = JSON.parse(raw);
-            const text = ev.candidates?.[0]?.content?.parts?.[0]?.text;
+            const text = extractGeminiText(ev);
             if (text) onText(text);
         } catch { /* partial JSON は無視 */ }
     });
 }
 
-// ── OpenAI-compatible streaming (Groq / OpenRouter) ──────────
+// ── OpenAI-compatible streaming (Groq) ────────────────────────
 async function callOpenAICompat(endpoint, apiKey, extraHeaders, model, systemPrompt, query, onText) {
     const res = await fetch(endpoint, {
         method: 'POST',
@@ -737,16 +744,7 @@ async function streamMagi(magi, query, keys) {
                 'https://api.groq.com/openai/v1/chat/completions',
                 keys.groq,
                 {},
-                'llama-3.3-70b-versatile',
-                system, query, onText
-            );
-
-        } else if (provider === 'openrouter') {
-            await callOpenAICompat(
-                'https://openrouter.ai/api/v1/chat/completions',
-                keys.openrouter,
-                { 'HTTP-Referer': location.href, 'X-Title': 'MAGI System' },
-                'mistralai/mistral-7b-instruct:free',
+                GROQ_MODEL,
                 system, query, onText
             );
         }
@@ -817,15 +815,13 @@ function showConsensus() {
 async function execute() {
     const keys = {
         gemini:     document.getElementById('keyGemini').value.trim(),
-        groq:       document.getElementById('keyGroq').value.trim(),
-        openrouter: document.getElementById('keyOpenRouter').value.trim()
+        groq:       document.getElementById('keyGroq').value.trim()
     };
     const query = document.getElementById('queryInput').value.trim();
 
     const missing = [];
     if (!keys.gemini)     missing.push('MELCHIOR (Gemini)');
-    if (!keys.groq)       missing.push('BALTHASAR (Groq)');
-    if (!keys.openrouter) missing.push('CASPAR (OpenRouter)');
+    if (!keys.groq)       missing.push('BALTHASAR / CASPAR (Groq)');
 
     if (missing.length) {
         document.getElementById('apiBody').classList.add('open');
