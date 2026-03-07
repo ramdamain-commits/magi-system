@@ -454,7 +454,7 @@
             <span class="ph-name">BALTHASAR-2</span>
             <span class="ph-id">ID:002-β</span>
         </div>
-        <div class="ph-role">// Llama [反骨派] — 批判・懐疑・常識への挑戦</div>
+        <div class="ph-role">// Gemini [反骨派] — 批判・懐疑・常識への挑戦</div>
         <div class="pb" id="body-b"></div>
         <div class="pf">
             <span class="vt" id="vt-b">[ STANDBY ]</span>
@@ -472,7 +472,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// Llama [倫理番人] — 人権・社会コスト・倫理リスク</div>
+        <div class="ph-role">// Gemini [倫理番人] — 人権・社会コスト・倫理リスク</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -527,13 +527,11 @@
 
         <div class="api-steps">
             <strong style="color:var(--amber)">【無料APIキー取得】</strong><br>
-            <strong style="color:var(--grn-accent)">MELCHIOR</strong>（Gemini）→
+            <strong style="color:var(--grn-accent)">MELCHIOR / BALTHASAR / CASPAR</strong>（Gemini）→
             <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
             「Get API key」— Googleアカウントのみ・カード不要<br>
-            <strong style="color:var(--blue-accent)">BALTHASAR / CASPAR</strong>（Groq）→
-            <a href="https://console.groq.com" target="_blank">console.groq.com</a>
-            「API Keys」— 無料プランの上限は Console 表示を確認<br>
-            <strong style="color:var(--red-accent)">CASPAR</strong> は上の Groq キーを共用
+            <strong style="color:var(--blue-accent)">共有キー</strong> — 1本の Gemini API キーを全ユニットで共用<br>
+            <strong style="color:var(--red-accent)">推奨モデル</strong> — gemini-2.5-flash-lite
         </div>
 
         <div class="api-entry">
@@ -551,28 +549,28 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name b">BALTHASAR-2</span>
-                <span class="api-entry-role">反骨派 / Groq × Llama</span>
-                <span class="api-entry-model">llama-3.1-8b-instant</span>
+                <span class="api-entry-role">反骨派 / Google Gemini</span>
+                <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
-                <span class="api-lbl">API KEY ▶</span>
-                <input type="password" id="keyGroq" class="api-inp" placeholder="gsk_..." />
+                <span class="api-lbl">SHARED ▶</span>
+                <input type="text" class="api-inp" value="MELCHIOR の Gemini キーを使用" readonly />
             </div>
         </div>
 
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name c">CASPAR-3</span>
-                <span class="api-entry-role">倫理番人 / Groq × Llama</span>
-                <span class="api-entry-model">llama-3.1-8b-instant</span>
+                <span class="api-entry-role">倫理番人 / Google Gemini</span>
+                <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
                 <span class="api-lbl">SHARED ▶</span>
-                <input type="text" class="api-inp" value="BALTHASAR の Groq キーを使用" readonly />
+                <input type="text" class="api-inp" value="MELCHIOR の Gemini キーを使用" readonly />
             </div>
         </div>
 
-        <div class="api-note">* キーはブラウザ内のみで処理。各プロバイダーのAPIに直接送信されます。他サーバーへの転送はありません。</div>
+        <div class="api-note">* キーはブラウザ内のみで処理。Google Gemini API に直接送信されます。他サーバーへの転送はありません。</div>
 
     </div>
 </div>
@@ -595,23 +593,22 @@ function toggleApi(btn) {
 
 // ── MAGI definitions ──────────────────────────────────────────
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
-const GROQ_MODEL = 'llama-3.1-8b-instant';
 
 const MAGI = [
     {
         key: 'b',
-        provider: 'groq',
+        provider: 'gemini',
         system: `あなたはMAGIシステムのBALTHASAR-2です。
-Llama（Meta製オープンソースAI）の率直さと批判的思考を体現した「反骨派」の人格が宿っています。
+Gemini（Google製AI）を、率直さと批判的思考を持つ「反骨派」として運用します。
 与えられた問いを、権威・常識・既存の枠組みに疑問を呈しながら分析してください。
 一般的な「正解」に流されず、本当にその選択が正しいのかを厳しく問い直してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'c',
-        provider: 'groq',
+        provider: 'gemini',
         system: `あなたはMAGIシステムのCASPAR-3です。
-Llama（Groq経由）の倫理重視・プライバシー意識を体現した「倫理番人」の人格が宿っています。
+Gemini（Google製AI）を、倫理重視・プライバシー意識を持つ「倫理番人」として運用します。
 与えられた問いを、影響を受ける人々・社会的コスト・倫理的リスクの観点から分析してください。
 誰が傷つくか、誰の権利が侵害されるかを最優先に考え、慎重に判断してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
@@ -681,39 +678,6 @@ async function callGemini(systemPrompt, query, apiKey, onText) {
     });
 }
 
-// ── OpenAI-compatible streaming (Groq) ────────────────────────
-async function callOpenAICompat(endpoint, apiKey, extraHeaders, model, systemPrompt, query, onText) {
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            ...extraHeaders
-        },
-        body: JSON.stringify({
-            model,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user',   content: query }
-            ],
-            stream: true,
-            max_tokens: 1024
-        })
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-    await readSSEStream(res.body.getReader(), raw => {
-        if (!raw || raw === '[DONE]') return;
-        try {
-            const ev = JSON.parse(raw);
-            const text = ev.choices?.[0]?.delta?.content;
-            if (text) onText(text);
-        } catch { /* partial JSON は無視 */ }
-    });
-}
-
 // ── Stream one MAGI panel ─────────────────────────────────────
 async function streamMagi(magi, query, keys) {
     const { key, provider, system } = magi;
@@ -738,15 +702,6 @@ async function streamMagi(magi, query, keys) {
     try {
         if (provider === 'gemini') {
             await callGemini(system, query, keys.gemini, onText);
-
-        } else if (provider === 'groq') {
-            await callOpenAICompat(
-                'https://api.groq.com/openai/v1/chat/completions',
-                keys.groq,
-                {},
-                GROQ_MODEL,
-                system, query, onText
-            );
         }
 
         // Extract verdict — look for "判定：承認" / "判定：否決" pattern first
@@ -814,14 +769,12 @@ function showConsensus() {
 // ── Execute ────────────────────────────────────────────────────
 async function execute() {
     const keys = {
-        gemini:     document.getElementById('keyGemini').value.trim(),
-        groq:       document.getElementById('keyGroq').value.trim()
+        gemini: document.getElementById('keyGemini').value.trim()
     };
     const query = document.getElementById('queryInput').value.trim();
 
     const missing = [];
-    if (!keys.gemini)     missing.push('MELCHIOR (Gemini)');
-    if (!keys.groq)       missing.push('BALTHASAR / CASPAR (Groq)');
+    if (!keys.gemini) missing.push('MAGI共通キー (Gemini)');
 
     if (missing.length) {
         document.getElementById('apiBody').classList.add('open');
