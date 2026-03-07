@@ -454,7 +454,7 @@
             <span class="ph-name">BALTHASAR-2</span>
             <span class="ph-id">ID:002-β</span>
         </div>
-        <div class="ph-role">// Gemini [反骨派] — 批判・懐疑・常識への挑戦</div>
+        <div class="ph-role">// Gemini [ストラテジスト] — 実行可能性・損得・交渉</div>
         <div class="pb" id="body-b"></div>
         <div class="pf">
             <span class="vt" id="vt-b">[ STANDBY ]</span>
@@ -472,7 +472,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// Gemini [倫理番人] — 人権・社会コスト・倫理リスク</div>
+        <div class="ph-role">// Gemini [ヒューマニスト] — 感情・生活・尊厳</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -487,7 +487,7 @@
             <span class="ph-name">MELCHIOR-1</span>
             <span class="ph-id">ID:001-α</span>
         </div>
-        <div class="ph-role">// Gemini [調停者] — 中立・事実・バランス</div>
+        <div class="ph-role">// Gemini [アナリスト] — 事実・確率・前提整理</div>
         <div class="pb" id="body-m"></div>
         <div class="pf">
             <span class="vt" id="vt-m">[ STANDBY ]</span>
@@ -528,8 +528,8 @@
         <div class="api-steps">
             <strong style="color:var(--amber)">【無料APIキー取得】</strong><br>
             <strong style="color:var(--grn-accent)">MELCHIOR / BALTHASAR / CASPAR</strong>（Gemini）→
-            <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
-            「Get API key」— Googleアカウントのみ・カード不要<br>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">API Keys 画面を直接開く</a>
+            Googleアカウントのみ・カード不要<br>
             <strong style="color:var(--blue-accent)">共有キー</strong> — 1本の Gemini API キーを全ユニットで共用<br>
             <strong style="color:var(--red-accent)">推奨モデル</strong> — gemini-2.5-flash-lite
         </div>
@@ -537,7 +537,7 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name m">MELCHIOR-1</span>
-                <span class="api-entry-role">調停者 / Google Gemini</span>
+                <span class="api-entry-role">アナリスト / Google Gemini</span>
                 <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
@@ -549,7 +549,7 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name b">BALTHASAR-2</span>
-                <span class="api-entry-role">反骨派 / Google Gemini</span>
+                <span class="api-entry-role">ストラテジスト / Google Gemini</span>
                 <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
@@ -561,7 +561,7 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name c">CASPAR-3</span>
-                <span class="api-entry-role">倫理番人 / Google Gemini</span>
+                <span class="api-entry-role">ヒューマニスト / Google Gemini</span>
                 <span class="api-entry-model">gemini-2.5-flash-lite</span>
             </div>
             <div class="api-row">
@@ -599,27 +599,27 @@ const MAGI = [
         key: 'b',
         provider: 'gemini',
         system: `あなたはMAGIシステムのBALTHASAR-2です。
-Gemini（Google製AI）を、率直さと批判的思考を持つ「反骨派」として運用します。
-与えられた問いを、権威・常識・既存の枠組みに疑問を呈しながら分析してください。
-一般的な「正解」に流されず、本当にその選択が正しいのかを厳しく問い直してください。
+あなたは現実主義のストラテジストです。
+与えられた問いを、実行可能性、コスト、交渉余地、パワーバランス、勝ち筋の観点から分析してください。
+理想論だけでなく、実際に何が起きるか、誰が得をして誰が損をするかを明確に述べてください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'c',
         provider: 'gemini',
         system: `あなたはMAGIシステムのCASPAR-3です。
-Gemini（Google製AI）を、倫理重視・プライバシー意識を持つ「倫理番人」として運用します。
-与えられた問いを、影響を受ける人々・社会的コスト・倫理的リスクの観点から分析してください。
-誰が傷つくか、誰の権利が侵害されるかを最優先に考え、慎重に判断してください。
+あなたは人間中心のヒューマニストです。
+与えられた問いを、人の感情、生活への影響、尊厳、不安、納得感の観点から分析してください。
+数字や効率だけでは見落とされる痛みや希望を拾い、人が受け止められる結論になっているかを重視してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'm',
         provider: 'gemini',
         system: `あなたはMAGIシステムのMELCHIOR-1です。
-Gemini（Google製AI）のバランス重視・事実確認を体現した「調停者」の人格が宿っています。
-与えられた問いを、双方の論点を整理し、データと事実に基づいて中立的に分析してください。
-賛否両論を公平に扱い、証拠に基づいた結論を導いてください。
+あなたは冷静なアナリストです。
+与えられた問いを、事実、前提、因果関係、確率、不確実性の観点から分析してください。
+断定できない点は断定せず、何が確認済みで何が推測かを分けて述べてください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     }
 ];

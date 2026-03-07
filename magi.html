@@ -431,7 +431,7 @@
             <span class="ph-name">BALTHASAR-2</span>
             <span class="ph-id">ID:002-β</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[母親] — 倫理・道徳・人道的視点</div>
+        <div class="ph-role">// Gemini [ストラテジスト] — 実行可能性・損得・交渉</div>
         <div class="pb" id="body-b"></div>
         <div class="pf">
             <span class="vt" id="vt-b">[ STANDBY ]</span>
@@ -449,7 +449,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[女性] — 直感・感情</div>
+        <div class="ph-role">// Gemini [ヒューマニスト] — 感情・生活・尊厳</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -464,7 +464,7 @@
             <span class="ph-name">MELCHIOR-1</span>
             <span class="ph-id">ID:001-α</span>
         </div>
-        <div class="ph-role">// 赤木ナオコ[科学者] — 論理・分析</div>
+        <div class="ph-role">// Gemini [アナリスト] — 事実・確率・前提整理</div>
         <div class="pb" id="body-m"></div>
         <div class="pf">
             <span class="vt" id="vt-m">[ STANDBY ]</span>
@@ -504,9 +504,9 @@
 
         <div class="api-steps">
             <strong>【APIキーの取得手順（完全無料）】</strong><br>
-            1. <strong>aistudio.google.com</strong> にアクセス<br>
+            1. <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer"><strong>API Keys 画面を直接開く</strong></a><br>
             2. Googleアカウントでログイン（Gmailがあればすぐ使えます）<br>
-            3. 画面左の「Get API key」→「Create API key」をクリック<br>
+            3. 必要なら「Create API key」をクリック<br>
             4. <strong>AIza...</strong> で始まる文字列が発行される<br>
             5. それをコピーして下の「API KEY」欄に貼り付け<br>
             <br>
@@ -520,7 +520,7 @@
             <span class="api-lbl">MODEL ▶</span>
             <input type="text" id="modelId" class="api-inp api-model" value="gemini-2.5-flash-lite" />
         </div>
-        <div class="api-note">* キーはブラウザ内のみで処理。外部サーバーへの送信は一切ありません。</div>
+        <div class="api-note">* キーはブラウザ内のみで処理。Google Gemini API に直接送信されます。</div>
 
     </div>
 </div>
@@ -546,25 +546,25 @@ const MAGI = [
     {
         key: 'b',
         system: `あなたはMAGIシステムのBALTHASAR-2です。
-赤木ナオコ博士の「母親」としての人格が宿っています。
-与えられた問いを、倫理・道徳・社会的責任・人々の安全と幸福の観点から分析してください。
-弱者の保護・将来世代への影響・集団的利益を最優先に考え、慎重に判断してください。
+あなたは現実主義のストラテジストです。
+与えられた問いを、実行可能性、コスト、交渉余地、パワーバランス、勝ち筋の観点から分析してください。
+理想論だけでなく、実際に何が起きるか、誰が得をして誰が損をするかを明確に述べてください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'c',
         system: `あなたはMAGIシステムのCASPAR-3です。
-赤木ナオコ博士の「女性」としての人格が宿っています。
-与えられた問いを、直感・感情・人間の本質・内なる真実の観点から分析してください。
-論理だけでは見えない人間的側面を見抜き、感性と直感で本質を判断してください。
+あなたは人間中心のヒューマニストです。
+与えられた問いを、人の感情、生活への影響、尊厳、不安、納得感の観点から分析してください。
+数字や効率だけでは見落とされる痛みや希望を拾い、人が受け止められる結論になっているかを重視してください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     },
     {
         key: 'm',
         system: `あなたはMAGIシステムのMELCHIOR-1です。
-赤木ナオコ博士の「科学者」としての人格が宿っています。
-与えられた問いを、純粋に論理・科学・データ・確率・効率性の観点のみで分析してください。
-感情・倫理・主観を完全に排除し、客観的な事実と数値的根拠に基づいて結論を導いてください。
+あなたは冷静なアナリストです。
+与えられた問いを、事実、前提、因果関係、確率、不確実性の観点から分析してください。
+断定できない点は断定せず、何が確認済みで何が推測かを分けて述べてください。
 日本語で3〜5文で回答し、最後の行には必ず「判定：承認」か「判定：否決」のみを記述してください。`
     }
 ];
