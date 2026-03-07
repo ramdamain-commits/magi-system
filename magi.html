@@ -510,7 +510,7 @@
             4. <strong>AIza...</strong> で始まる文字列が発行される<br>
             5. それをコピーして下の「API KEY」欄に貼り付け<br>
             <br>
-            <strong>【無料枠】</strong> gemini-2.5-flash: 20リクエスト/日・5回/分（クレカ不要）<br>
+            <strong>【無料枠】</strong> gemini-2.5-flash-lite を推奨（最新の無料枠は Google 側の表示を確認）<br>
             <strong>【注意】</strong> キーは他人に見せないでください。漏れた場合はGoogle Consoleで即削除を。
         </div>
 
@@ -518,7 +518,7 @@
             <span class="api-lbl">API KEY ▶</span>
             <input type="password" id="apiKey" class="api-inp" placeholder="AIza..." />
             <span class="api-lbl">MODEL ▶</span>
-            <input type="text" id="modelId" class="api-inp api-model" value="gemini-2.5-flash" />
+            <input type="text" id="modelId" class="api-inp api-model" value="gemini-2.5-flash-lite" />
         </div>
         <div class="api-note">* キーはブラウザ内のみで処理。外部サーバーへの送信は一切ありません。</div>
 
@@ -608,17 +608,18 @@ async function streamMagi(magi, query, apiKey, model) {
 
         while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
-            buf += decoder.decode(value, { stream: true });
+            buf += done ? decoder.decode() : decoder.decode(value, { stream: true });
             const lines = buf.split('\n');
-            buf = lines.pop();
+            buf = done ? '' : (lines.pop() ?? '');
             for (const line of lines) {
                 if (!line.startsWith('data: ')) continue;
                 const raw = line.slice(6).trim();
                 if (!raw) continue;
                 try {
                     const ev   = JSON.parse(raw);
-                    const text = ev.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const text = (ev.candidates?.[0]?.content?.parts ?? [])
+                        .map(part => part.text ?? '')
+                        .join('');
                     if (text) {
                         full += text;
                         bodyEl.textContent = full;
@@ -626,6 +627,7 @@ async function streamMagi(magi, query, apiKey, model) {
                     }
                 } catch {}
             }
+            if (done) break;
         }
 
         // Extract verdict from last non-empty line
@@ -692,7 +694,7 @@ function showConsensus() {
 // ── Execute ────────────────────────────────────────────────────
 async function execute() {
     const apiKey = document.getElementById('apiKey').value.trim();
-    const model  = document.getElementById('modelId').value.trim() || 'gemini-2.5-flash';
+    const model  = document.getElementById('modelId').value.trim() || 'gemini-2.5-flash-lite';
     const query  = document.getElementById('queryInput').value.trim();
 
     if (!apiKey) {
