@@ -21,6 +21,9 @@
 - Gemini 呼び出しに `application/json` と JSON schema を指定し、構造化レスポンスの崩れで `FORMAT ERROR` になりにくくした
 - `panels` と `consensus` のキー揺れ、コードブロック、末尾カンマ混入に耐える軽い JSON 復旧処理を追加した
 - `HTTP 400` を一律 `AUTH ERROR` にせず、schema 不整合や bad request は `REQUEST ERROR` として案内するようにした
+- structured output 向けプロンプトを圧縮し、`maxOutputTokens` を拡張して、JSON が途中で切れやすい状態を緩和した
+- `MAX_TOKENS` 由来の打ち切りを `RESPONSE TOO LONG` として分離し、`FORMAT ERROR` と見分けられるようにした
+- JSON の `{` だけ返って閉じずに終わるケースを `JSON payload truncated` として検出し、一般的な解析失敗と区別して案内するようにした
 
 ### Added
 
