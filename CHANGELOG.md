@@ -6,8 +6,8 @@
 
 - `index.html` の審議フローを、3 並列 API 呼び出しから 1 回の Gemini 呼び出し + ローカル段階表示へ切り替えた
 - 3 本のストリームを直接描画する方式をやめ、`BALTHASAR -> CASPAR -> MELCHIOR -> CONSENSUS` の順に UI 側で開示する方式へ変更した
-- Gemini への要求を自由文から短い JSON 構造へ寄せ、`panels` と `consensus` をまとめて返す構成へ変えた
-- 各人格の `reasons` を最大 2 件、`conditions` を最大 2 件に抑え、トークン消費を削減した
+- Gemini への要求を自由文から短い JSON 構造へ寄せ、モデルは `panels` を返し、`consensus` は UI 側で合成する構成へ変えた
+- 各人格の `reasons` を最大 1 件、`conditions` を最大 1 件に抑え、トークン消費をさらに削減した
 - `RESET` で進行中のリクエストを中断し、無駄な API 消費を止めるようにした
 - 問い入力欄と API 設定欄の文言を、単発審議モードに合わせて更新した
 - 合議表示の補助文言を `SINGLE REQUEST / LOCAL REVEAL` ベースに更新した
@@ -24,6 +24,7 @@
 - structured output 向けプロンプトを圧縮し、`maxOutputTokens` を拡張して、JSON が途中で切れやすい状態を緩和した
 - `MAX_TOKENS` 由来の打ち切りを `RESPONSE TOO LONG` として分離し、`FORMAT ERROR` と見分けられるようにした
 - JSON の `{` だけ返って閉じずに終わるケースを `JSON payload truncated` として検出し、一般的な解析失敗と区別して案内するようにした
+- `MAX_TOKENS` でも JSON が完結していれば使えるように、打ち切り判定をパース成功後へ後ろ倒しした
 
 ### Added
 
