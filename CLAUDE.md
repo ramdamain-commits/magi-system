@@ -1,7 +1,7 @@
 # MAGI System - Project Guide
 
 ## 概要
-エヴァンゲリオン風の意思決定 UI アプリ。3つの AI パネル（BALTHASAR / CASPAR / MELCHIOR）の審議と合議を、1 回の Gemini リクエストから生成し、ローカルで段階表示する。
+エヴァンゲリオン風の意思決定 UI アプリ。3つの AI パネル（BALTHASAR / CASPAR / MELCHIOR）の審議を 1 回の Gemini リクエストから生成し、合議はローカルで合成して段階表示する。
 
 ## 開発目的
 - 重要な判断を AI に委任するのではなく、異なる価値観を衝突させて blind spot を減らす
