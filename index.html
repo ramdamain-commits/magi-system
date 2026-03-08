@@ -1184,10 +1184,17 @@ function classifyError(error) {
         };
     }
 
-    if ([400, 401, 403].includes(error?.status) || /api key|credential|permission|auth/i.test(message)) {
+    if ([401, 403].includes(error?.status) || /api key|credential|permission|auth/i.test(message)) {
         return {
             code: 'AUTH ERROR',
             message: 'APIキーが無効か権限が不足しています。Google AI Studio のキーを確認してください。'
+        };
+    }
+
+    if (error?.status === 400 || /invalid argument|bad request|schema/i.test(message)) {
+        return {
+            code: 'REQUEST ERROR',
+            message: 'Gemini が審議リクエストを受け付けませんでした。入力内容か応答形式を見直して再試行してください。'
         };
     }
 

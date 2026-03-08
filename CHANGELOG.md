@@ -20,6 +20,7 @@
 - API エラーを `RATE LIMITED / AUTH ERROR / SAFETY BLOCK / NO RESPONSE / REQUEST ERROR` に分類するようにした
 - Gemini 呼び出しに `application/json` と JSON schema を指定し、構造化レスポンスの崩れで `FORMAT ERROR` になりにくくした
 - `panels` と `consensus` のキー揺れ、コードブロック、末尾カンマ混入に耐える軽い JSON 復旧処理を追加した
+- `HTTP 400` を一律 `AUTH ERROR` にせず、schema 不整合や bad request は `REQUEST ERROR` として案内するようにした
 
 ### Added
 
