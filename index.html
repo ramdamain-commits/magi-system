@@ -647,6 +647,66 @@ const PANEL_REVEAL_DELAY = 260;
 const CONSENSUS_REVEAL_DELAY = 220;
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const LATENT_MINORITY_TEXT = '満場一致だが潜在的な反対論点は残る。';
+const PANEL_RESPONSE_SCHEMA = {
+    type: 'object',
+    properties: {
+        conclusion: { type: 'string', description: '結論。28字以内。' },
+        reasons: {
+            type: 'array',
+            description: '理由。1〜2件。',
+            items: { type: 'string' },
+            minItems: 1,
+            maxItems: 2
+        },
+        risk: { type: 'string', description: '最大リスク。40字以内。' },
+        conditions: {
+            type: 'array',
+            description: '承認条件。0〜2件。',
+            items: { type: 'string' },
+            maxItems: 2
+        },
+        verdict: {
+            type: 'string',
+            description: 'approve か reject。',
+            enum: ['approve', 'reject']
+        }
+    },
+    required: ['conclusion', 'reasons', 'risk', 'conditions', 'verdict']
+};
+const MAGI_RESPONSE_SCHEMA = {
+    type: 'object',
+    properties: {
+        panels: {
+            type: 'object',
+            properties: {
+                b: PANEL_RESPONSE_SCHEMA,
+                c: PANEL_RESPONSE_SCHEMA,
+                m: PANEL_RESPONSE_SCHEMA
+            },
+            required: ['b', 'c', 'm']
+        },
+        consensus: {
+            type: 'object',
+            properties: {
+                final_text: {
+                    type: 'string',
+                    enum: ['承認', '条件付き承認', '否決', '差し戻し']
+                },
+                vote_summary: { type: 'string' },
+                majority_view: { type: 'string' },
+                minority_view: { type: 'string' },
+                hold_conditions: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    maxItems: 4
+                },
+                recommended_action: { type: 'string' }
+            },
+            required: ['final_text', 'vote_summary', 'majority_view', 'minority_view', 'hold_conditions', 'recommended_action']
+        }
+    },
+    required: ['panels', 'consensus']
+};
 
 const MAGI = [
     {
@@ -785,6 +845,23 @@ function createStructuredError(code, message, status) {
     return error;
 }
 
+function repairJsonText(text) {
+    return String(text || '')
+        .replace(/^\uFEFF/, '')
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .replace(/,\s*([}\]])/g, '$1')
+        .trim();
+}
+
+function parseJsonCandidate(candidate) {
+    try {
+        return JSON.parse(candidate);
+    } catch {
+        return JSON.parse(repairJsonText(candidate));
+    }
+}
+
 function extractJsonPayload(text) {
     const trimmed = String(text || '').trim();
     const blockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/iu);
@@ -797,10 +874,31 @@ function extractJsonPayload(text) {
     }
 
     try {
-        return JSON.parse(candidate.slice(start, end + 1));
+        return parseJsonCandidate(candidate.slice(start, end + 1));
     } catch {
         throw createStructuredError('FORMAT_ERROR', 'JSON parse failed');
     }
+}
+
+function getSourceValue(source, keys) {
+    for (const key of keys) {
+        if (source?.[key] !== undefined && source?.[key] !== null) {
+            return source[key];
+        }
+    }
+    return undefined;
+}
+
+function getPanelSource(payload, key, meta) {
+    const panels = payload?.panels && typeof payload.panels === 'object'
+        ? payload.panels
+        : payload;
+    return panels?.[key]
+        || panels?.[meta.name]
+        || panels?.[meta.name.toLowerCase()]
+        || panels?.[PANEL_LABELS[key]]
+        || panels?.[PANEL_LABELS[key].toLowerCase()]
+        || null;
 }
 
 function sanitizePanelResponse(source, meta) {
@@ -808,18 +906,19 @@ function sanitizePanelResponse(source, meta) {
         throw createStructuredError('FORMAT_ERROR', `${meta.name} panel missing`);
     }
 
-    const reasons = sanitizeArray(source.reasons).slice(0, 2);
-    const conditions = sanitizeArray(source.conditions)
+    const reasons = sanitizeArray(getSourceValue(source, ['reasons', 'reason', '理由'])).slice(0, 2);
+    const conditions = sanitizeArray(getSourceValue(source, ['conditions', 'approval_conditions', 'hold_conditions', '承認条件']))
         .filter(condition => !/^(条件なし|なし|特になし)$/u.test(condition))
         .slice(0, 2);
-    const verdict = normalizeVerdict(source.verdict) || normalizeVerdict(source.conclusion);
+    const verdict = normalizeVerdict(getSourceValue(source, ['verdict', 'decision', '判定']))
+        || normalizeVerdict(getSourceValue(source, ['conclusion', '結論']));
 
     return {
         name: meta.name,
         badge: meta.badge,
-        conclusion: cleanLine(source.conclusion) || verdictLabel(verdict),
+        conclusion: cleanLine(getSourceValue(source, ['conclusion', '結論'])) || verdictLabel(verdict),
         reasons,
-        risk: cleanLine(source.risk) || reasons[0] || '主要リスクの明記なし',
+        risk: cleanLine(getSourceValue(source, ['risk', 'max_risk', '最大リスク'])) || reasons[0] || '主要リスクの明記なし',
         conditions,
         verdict
     };
@@ -958,14 +1057,20 @@ function getOutcomeState(approveCount, rejectCount, resolvedCount) {
 }
 
 function buildValidatedDeliberation(rawText) {
-    const payload = extractJsonPayload(rawText);
-    if (!payload || typeof payload !== 'object' || !payload.panels) {
-        throw createStructuredError('FORMAT_ERROR', 'panels payload missing');
+    let payload;
+    try {
+        payload = extractJsonPayload(rawText);
+    } catch (error) {
+        error.rawText = rawText;
+        throw error;
+    }
+    if (!payload || typeof payload !== 'object') {
+        throw createStructuredError('FORMAT_ERROR', 'payload missing');
     }
 
     const panels = Object.fromEntries(MAGI.map(meta => [
         meta.key,
-        sanitizePanelResponse(payload.panels[meta.key], meta)
+        sanitizePanelResponse(getPanelSource(payload, meta.key, meta), meta)
     ]));
 
     const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
@@ -979,8 +1084,10 @@ function buildValidatedDeliberation(rawText) {
         ? PANEL_KEYS.filter(key => panels[key].verdict && panels[key].verdict !== outcome.majorityVerdict)
         : [];
 
-    const rawConsensus = payload.consensus && typeof payload.consensus === 'object' ? payload.consensus : {};
-    const holdConditions = sanitizeArray(rawConsensus.hold_conditions).slice(0, 4);
+    const rawConsensus = payload.consensus && typeof payload.consensus === 'object'
+        ? payload.consensus
+        : payload;
+    const holdConditions = sanitizeArray(getSourceValue(rawConsensus, ['hold_conditions', 'conditions', '保留条件'])).slice(0, 4);
     const effectiveHoldConditions = holdConditions.length
         ? holdConditions
         : collectHoldConditions(outcome.majorityVerdict, panels);
@@ -989,13 +1096,13 @@ function buildValidatedDeliberation(rawText) {
         panels,
         consensus: {
             outcome,
-            voteSummary: `${approveCount} approve / ${rejectCount} reject`,
-            majorityView: cleanLine(rawConsensus.majority_view)
+            voteSummary: cleanLine(getSourceValue(rawConsensus, ['vote_summary', 'voteSummary'])) || `${approveCount} approve / ${rejectCount} reject`,
+            majorityView: cleanLine(getSourceValue(rawConsensus, ['majority_view', 'majorityView', '多数派']))
                 || (majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。'),
-            minorityView: cleanLine(rawConsensus.minority_view)
+            minorityView: cleanLine(getSourceValue(rawConsensus, ['minority_view', 'minorityView', '少数意見']))
                 || (minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels)),
             holdConditions: effectiveHoldConditions,
-            recommendedAction: cleanLine(rawConsensus.recommended_action)
+            recommendedAction: cleanLine(getSourceValue(rawConsensus, ['recommended_action', 'recommendedAction', '推奨アクション']))
                 || buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
         }
     };
@@ -1011,8 +1118,10 @@ async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents: [{ role: 'user', parts: [{ text: `審議対象:\n${query}` }] }],
             generationConfig: {
+                responseMimeType: 'application/json',
+                responseJsonSchema: MAGI_RESPONSE_SCHEMA,
                 maxOutputTokens: 896,
-                temperature: 1.05
+                temperature: 0.85
             }
         })
     });
@@ -1247,6 +1356,9 @@ async function execute() {
         await revealDeliberation(data, runId);
     } catch (error) {
         if (error?.name === 'AbortError' || runId !== activeRunId) return;
+        if (error?.code === 'FORMAT_ERROR') {
+            console.warn('[MAGI] format error raw response', error.rawText || error.message);
+        }
         renderGlobalError(classifyError(error));
     } finally {
         if (activeController === controller) {
