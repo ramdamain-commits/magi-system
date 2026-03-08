@@ -761,33 +761,24 @@ function buildSingleMagiPrompt() {
         '各人格は自分の管轄外でバランスを取らないこと。',
         '各人格の verdict は approve か reject のどちらかで返すこと。',
         '各人格の reasons は 1〜2 件、conditions は 0〜2 件に抑えること。',
-        'conclusion は 28 字以内、reason/risk/condition は 40 字以内、consensus の各文は 70 字以内に抑えること。',
+        'conclusion は 22 字以内、reason/risk/condition は 32 字以内、consensus の各文は 56 字以内に抑えること。',
         '明確に危険・違法・破綻している問いを除き、少なくとも1人格は真剣に dissent を検討すること。',
-        '全員一致でも consensus.minority_view には最も強い潜在反対論点を短く残すこと。',
-        'JSON スキーマ:',
-        '{',
-        '  "panels": {',
-        '    "b": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" },',
-        '    "c": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" },',
-        '    "m": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" }',
-        '  },',
-        '  "consensus": {',
-        '    "final_text": "承認|条件付き承認|否決|差し戻し",',
-        '    "vote_summary": "2 approve / 1 reject",',
-        '    "majority_view": "...",',
-        '    "minority_view": "...",',
-        '    "hold_conditions": ["..."],',
-        '    "recommended_action": "..."',
-        '  }',
-        '}',
-        '人格定義:'
+        '全員一致でも consensus.minority_view には最も強い潜在反対論点を短く残すこと。'
     ];
+
+    lines.push(
+        '人格定義:',
+        'BALTHASAR-2: 常識・楽観・権威依存を疑う。',
+        'CASPAR-3: 権利侵害・悪用・炎上・弱者への負荷を疑う。',
+        'MELCHIOR-1: 実装可能性・責任者・運用負荷・撤退条件を疑う。'
+    );
 
     MAGI.forEach(panel => {
         lines.push(`${panel.name} (${panel.badge})`);
-        lines.push(`- 管轄: ${panel.identity}`);
         panel.rules.forEach(rule => lines.push(`- ${rule}`));
     });
+
+    lines.push('重要: schema どおりの JSON だけを返し、値は短く詰めてください。');
 
     return lines.join('\n');
 }
@@ -845,6 +836,22 @@ function createStructuredError(code, message, status) {
     return error;
 }
 
+function buildFormatErrorMessage(detail) {
+    if (/panel missing/i.test(detail)) {
+        return '審議レスポンスの一部が欠けています。もう一度実行してください。';
+    }
+    if (/JSON parse failed|payload truncated|unexpected end|unterminated/i.test(detail)) {
+        return '構造化レスポンスが途中で切れたか、JSON が崩れました。もう一度実行してください。';
+    }
+    return '構造化レスポンスの解析に失敗しました。もう一度実行してください。';
+}
+
+function attachStructuredContext(error, context) {
+    if (context?.rawText) error.rawText = context.rawText;
+    if (context?.finishReason) error.finishReason = context.finishReason;
+    return error;
+}
+
 function repairJsonText(text) {
     return String(text || '')
         .replace(/^\uFEFF/, '')
@@ -869,8 +876,11 @@ function extractJsonPayload(text) {
     const start = candidate.indexOf('{');
     const end = candidate.lastIndexOf('}');
 
-    if (start === -1 || end === -1 || end < start) {
+    if (start === -1) {
         throw createStructuredError('FORMAT_ERROR', 'JSON payload not found');
+    }
+    if (end === -1 || end < start) {
+        throw createStructuredError('FORMAT_ERROR', 'JSON payload truncated');
     }
 
     try {
@@ -1061,17 +1071,25 @@ function buildValidatedDeliberation(rawText) {
     try {
         payload = extractJsonPayload(rawText);
     } catch (error) {
-        error.rawText = rawText;
+        attachStructuredContext(error, { rawText });
         throw error;
     }
     if (!payload || typeof payload !== 'object') {
-        throw createStructuredError('FORMAT_ERROR', 'payload missing');
+        throw attachStructuredContext(
+            createStructuredError('FORMAT_ERROR', 'payload missing'),
+            { rawText }
+        );
     }
 
-    const panels = Object.fromEntries(MAGI.map(meta => [
-        meta.key,
-        sanitizePanelResponse(getPanelSource(payload, meta.key, meta), meta)
-    ]));
+    let panels;
+    try {
+        panels = Object.fromEntries(MAGI.map(meta => [
+            meta.key,
+            sanitizePanelResponse(getPanelSource(payload, meta.key, meta), meta)
+        ]));
+    } catch (error) {
+        throw attachStructuredContext(error, { rawText });
+    }
 
     const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
     const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
@@ -1120,8 +1138,8 @@ async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
             generationConfig: {
                 responseMimeType: 'application/json',
                 responseJsonSchema: MAGI_RESPONSE_SCHEMA,
-                maxOutputTokens: 896,
-                temperature: 0.85
+                maxOutputTokens: 1536,
+                temperature: 0.55
             }
         })
     });
@@ -1150,6 +1168,13 @@ async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
         throw createStructuredError('EMPTY', '[応答を受信できませんでした]');
     }
 
+    if (candidate?.finishReason === 'MAX_TOKENS') {
+        throw attachStructuredContext(
+            createStructuredError('TRUNCATED', 'Gemini response hit max tokens'),
+            { rawText: text, finishReason: candidate.finishReason }
+        );
+    }
+
     return text;
 }
 
@@ -1159,7 +1184,14 @@ function classifyError(error) {
     if (error?.code === 'FORMAT_ERROR') {
         return {
             code: 'FORMAT ERROR',
-            message: '構造化レスポンスの解析に失敗しました。もう一度実行してください。'
+            message: buildFormatErrorMessage(error?.message || '')
+        };
+    }
+
+    if (error?.code === 'TRUNCATED') {
+        return {
+            code: 'RESPONSE TOO LONG',
+            message: 'Gemini の応答が途中で切れました。少し短い問いで再試行してください。'
         };
     }
 
@@ -1363,8 +1395,13 @@ async function execute() {
         await revealDeliberation(data, runId);
     } catch (error) {
         if (error?.name === 'AbortError' || runId !== activeRunId) return;
-        if (error?.code === 'FORMAT_ERROR') {
-            console.warn('[MAGI] format error raw response', error.rawText || error.message);
+        if (error?.code === 'FORMAT_ERROR' || error?.code === 'TRUNCATED') {
+            console.warn('[MAGI] format error detail', {
+                code: error.code,
+                message: error.message,
+                finishReason: error.finishReason || null,
+                rawText: error.rawText || null
+            });
         }
         renderGlobalError(classifyError(error));
     } finally {
