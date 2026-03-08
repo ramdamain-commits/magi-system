@@ -18,6 +18,8 @@
 - 単独の `承認 / 否決` 行が `理由` に混ざるケースを吸収し、判定抽出を安定させた
 - JSON 欠損や不正レスポンス時に `FORMAT ERROR` を返し、審議失敗の理由を見分けやすくした
 - API エラーを `RATE LIMITED / AUTH ERROR / SAFETY BLOCK / NO RESPONSE / REQUEST ERROR` に分類するようにした
+- Gemini 呼び出しに `application/json` と JSON schema を指定し、構造化レスポンスの崩れで `FORMAT ERROR` になりにくくした
+- `panels` と `consensus` のキー揺れ、コードブロック、末尾カンマ混入に耐える軽い JSON 復旧処理を追加した
 
 ### Added
 
