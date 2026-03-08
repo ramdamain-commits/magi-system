@@ -1,12 +1,13 @@
 # MAGI System - Project Guide
 
 ## 概要
-エヴァンゲリオン風の意思決定UIアプリ。3つのAIパネル（BALTHASAR/CASPAR/MELCHIOR）がGemini APIで並列審議し、対立・少数意見・承認条件を可視化する。
+エヴァンゲリオン風の意思決定 UI アプリ。3つの AI パネル（BALTHASAR / CASPAR / MELCHIOR）の審議と合議を、1 回の Gemini リクエストから生成し、ローカルで段階表示する。
 
 ## 開発目的
 - 重要な判断を AI に委任するのではなく、異なる価値観を衝突させて blind spot を減らす
 - UI と API 連携の見栄え中心の段階から、ゲーム性と審議品質を鍛える段階へ移行する
 - 良いアプリの条件を「満場一致」ではなく「なぜ割れたかが読めること」に置く
+- API 上限で止まりにくい審議ループを作る
 
 ## ファイル構成
 - `index.html` — メインアプリ（現行バージョン）
@@ -15,7 +16,8 @@
 
 ## 技術スタック
 - 純粋な HTML / CSS / Vanilla JS（ビルド不要）
-- Gemini API（`generativelanguage.googleapis.com`）でストリーミング
+- Gemini API（`generativelanguage.googleapis.com`）を 1 回呼び、構造化レスポンスを受け取る
+- 3 パネルの段階表示はクライアント側で制御する
 - APIキーはブラウザのみで処理、サーバー送信なし
 
 ## 開発サーバー
@@ -31,6 +33,7 @@
 - CSS 変数（`--amber` 等）でテーマカラーを管理
 - モバイル対応必須（`max-width: 500px` のメディアクエリあり）
 - 仕様変更時は `README.md`、`CHANGELOG.md`、関連ドキュメントの更新要否を確認する
+- 通信方式や JSON 契約を変える時は、描画ロジックとドキュメントを同時に更新する
 
 ## Git / GitHub
 - メインブランチ: `main`

@@ -586,7 +586,7 @@
     <textarea id="queryInput" rows="2"
         placeholder="MAGIへの問いを入力...&#10;例:「生成AIで採用一次面接を自動化すべきか」「従業員監視AIを導入すべきか」"></textarea>
 </div>
-<div class="query-hint">革新、被害、運用が衝突する問いほど審議が割れやすくなります。曖昧な善悪より、利害がぶつかるテーマ向きです。</div>
+<div class="query-hint">1回の審議で3人格と合議をまとめて生成します。革新、被害、運用が衝突する問いほど、ローカル開示でも割れが読みやすくなります。</div>
 
 <!-- Controls -->
 <div class="controls">
@@ -611,7 +611,7 @@
         <div class="api-entry">
             <div class="api-entry-header">
                 <span class="api-entry-name m">GEMINI API KEY</span>
-                <span class="api-entry-role">全パネル共通 / gemini-2.5-flash</span>
+                <span class="api-entry-role">3人格+合議を1回で生成 / gemini-2.5-flash</span>
             </div>
             <div class="api-row">
                 <span class="api-lbl">API KEY ▶</span>
@@ -619,69 +619,51 @@
             </div>
         </div>
 
-        <div class="api-note">* キーはブラウザ内のみで処理。Gemini API に直接送信されます。他サーバーへの転送はありません。</div>
+        <div class="api-note">* 1回の Gemini リクエストで 3 パネル分の審議と合議を取得します。キーはブラウザ内のみで処理され、他サーバーへの転送はありません。</div>
 
     </div>
 </div>
 
 <script>
-// ── Clock ──────────────────────────────────────────────────────
 function tick() {
     document.getElementById('clock').textContent =
-        new Date().toLocaleTimeString('ja-JP', {hour12:false});
+        new Date().toLocaleTimeString('ja-JP', { hour12: false });
 }
-tick(); setInterval(tick, 1000);
+tick();
+setInterval(tick, 1000);
 
-// ── API section toggle ─────────────────────────────────────────
-function toggleApi(btn) {
+function toggleApi() {
     const body = document.getElementById('apiBody');
     const icon = document.getElementById('apiIcon');
     const open = body.classList.toggle('open');
     icon.textContent = open ? '∧' : '∨';
 }
 
-// ── MAGI definitions ──────────────────────────────────────────
-const RESPONSE_FORMAT = [
-    '必ず以下の書式だけで回答してください。',
-    '結論: 承認 または 否決',
-    '理由:',
-    '- 箇条書きで2〜3点',
-    '最大リスク: 1つに絞って書く',
-    '承認条件:',
-    '- 1〜3点。否決の場合も、承認に転じるための条件を必ず書く',
-    '判定: 承認 または 否決'
-].join('\n');
-
-function buildSystemPrompt(panel) {
-    return `あなたはMAGIシステムの${panel.name}です。役割は「${panel.badge}」です。
-${panel.identity}
-以下の原則を必ず守ってください。
-- 自分の管轄外の観点でバランスを取ろうとしないこと。
-- 他の人格に迎合せず、自分の基準で容赦なく判断すること。
-- 迷ったら曖昧な中立ではなく、自分の基準に照らして承認か否決を選ぶこと。
-- 「承認条件」は空欄禁止。否決でも、承認に転じるための具体条件を書くこと。
-${panel.rules.map(rule => `- ${rule}`).join('\n')}
-${RESPONSE_FORMAT}`;
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+const PANEL_REVEAL_DELAY = 260;
+const CONSENSUS_REVEAL_DELAY = 220;
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const LATENT_MINORITY_TEXT = '満場一致だが潜在的な反対論点は残る。';
 
 const MAGI = [
     {
         key: 'b',
         name: 'BALTHASAR-2',
         badge: '異端審問官',
-        provider: 'gemini',
         identity: '常識、権威、空気、綺麗事に最初に疑いを向ける前提破壊担当です。',
         rules: [
             '既存の常識をなぞるだけの提案、言い換えだけの改善、楽観前提の企画には強く否決寄りになること。',
             'その案で本当に世界が良くなるのか、誰かが都合よく騙されていないかを暴くこと。',
-            '承認する場合も「退屈な安全策だから」ではなく、挑戦する価値と可逆性がある時だけにすること。'
+            '承認する場合も、挑戦する価値と可逆性がある時だけにすること。'
         ]
     },
     {
         key: 'c',
         name: 'CASPAR-3',
         badge: '被害監査官',
-        provider: 'gemini',
         identity: '弱い立場の人、見えにくい被害者、炎上、悪用、権利侵害を止める防衛担当です。',
         rules: [
             '誰が傷つくか、誰が排除されるか、誰が監視されるかを最優先で評価すること。',
@@ -693,7 +675,6 @@ const MAGI = [
         key: 'm',
         name: 'MELCHIOR-1',
         badge: '執行責任者',
-        provider: 'gemini',
         identity: '実装、コスト、責任者、運用負荷、撤退計画まで背負う現場責任者です。',
         rules: [
             '担当者、計測方法、運用フロー、失敗時の撤退条件が見えない案は否決寄りにすること。',
@@ -701,20 +682,58 @@ const MAGI = [
             '承認する場合も、すぐ本番ではなく条件付きで小さく試せる時に限ること。'
         ]
     }
-].map(panel => ({ ...panel, system: buildSystemPrompt(panel) }));
+];
 
 const PANEL_KEYS = MAGI.map(panel => panel.key);
+const PANEL_META = Object.fromEntries(MAGI.map(panel => [panel.key, panel]));
+const PANEL_LABELS = { b: 'BALTHASAR', c: 'CASPAR', m: 'MELCHIOR' };
 const verdicts = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const panelStates = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 
-function normalizeVerdict(value) {
-    const match = (value || '').match(/(承認|否決)/);
-    if (!match) return null;
-    return match[1] === '承認' ? 'approve' : 'reject';
+let activeRunId = 0;
+let activeController = null;
+
+function buildSingleMagiPrompt() {
+    const lines = [
+        'あなたはMAGI SYSTEMです。1回の内部審議で3人格の回答と合議結果を返してください。',
+        '出力は必ず JSON のみ。コードブロック、前置き、後書きは禁止です。',
+        '3人格は互いに迎合せず、同じ理由を使い回さないこと。',
+        '各人格は自分の管轄外でバランスを取らないこと。',
+        '各人格の verdict は approve か reject のどちらかで返すこと。',
+        '各人格の reasons は 1〜2 件、conditions は 0〜2 件に抑えること。',
+        'conclusion は 28 字以内、reason/risk/condition は 40 字以内、consensus の各文は 70 字以内に抑えること。',
+        '明確に危険・違法・破綻している問いを除き、少なくとも1人格は真剣に dissent を検討すること。',
+        '全員一致でも consensus.minority_view には最も強い潜在反対論点を短く残すこと。',
+        'JSON スキーマ:',
+        '{',
+        '  "panels": {',
+        '    "b": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" },',
+        '    "c": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" },',
+        '    "m": { "conclusion": "...", "reasons": ["..."], "risk": "...", "conditions": ["..."], "verdict": "approve|reject" }',
+        '  },',
+        '  "consensus": {',
+        '    "final_text": "承認|条件付き承認|否決|差し戻し",',
+        '    "vote_summary": "2 approve / 1 reject",',
+        '    "majority_view": "...",',
+        '    "minority_view": "...",',
+        '    "hold_conditions": ["..."],',
+        '    "recommended_action": "..."',
+        '  }',
+        '}',
+        '人格定義:'
+    ];
+
+    MAGI.forEach(panel => {
+        lines.push(`${panel.name} (${panel.badge})`);
+        lines.push(`- 管轄: ${panel.identity}`);
+        panel.rules.forEach(rule => lines.push(`- ${rule}`));
+    });
+
+    return lines.join('\n');
 }
 
 function cleanLine(value) {
-    return (value || '')
+    return String(value || '')
         .replace(/^(?:[-*・●▪■◆◇▶>]+|\d+[.)．]|[０-９]+[.)．])\s*/, '')
         .replace(/\s+/g, ' ')
         .trim();
@@ -732,73 +751,83 @@ function uniqueItems(items) {
     return result;
 }
 
+function sanitizeArray(value) {
+    const source = Array.isArray(value) ? value : value ? [value] : [];
+    return uniqueItems(source.map(item => cleanLine(item)));
+}
+
 function summarizeText(value, limit = 68) {
     const flat = cleanLine(value);
     if (flat.length <= limit) return flat;
     return `${flat.slice(0, limit - 1)}…`;
 }
 
-function parsePanelResponse(text) {
-    const parsed = {
-        raw: text,
-        conclusion: '',
-        reasons: [],
-        risk: '',
-        conditions: [],
-        verdict: null
-    };
-
-    let currentSection = '';
-    text.replace(/\r/g, '').split('\n').forEach(sourceLine => {
-        const line = sourceLine.trim();
-        if (!line) return;
-
-        const sectionMatch = line.match(/^(結論|理由|最大リスク|承認条件|判定)\s*[:：]\s*(.*)$/);
-        if (sectionMatch) {
-            currentSection = sectionMatch[1];
-            const value = cleanLine(sectionMatch[2]);
-            if (currentSection === '結論') parsed.conclusion = value;
-            if (currentSection === '理由' && value) parsed.reasons.push(value);
-            if (currentSection === '最大リスク') parsed.risk = value;
-            if (currentSection === '承認条件' && value) parsed.conditions.push(value);
-            if (currentSection === '判定') parsed.verdict = normalizeVerdict(value);
-            return;
-        }
-
-        const value = cleanLine(line);
-        if (!value) return;
-
-        if (currentSection === '結論' && !parsed.conclusion) parsed.conclusion = value;
-        if (currentSection === '理由') parsed.reasons.push(value);
-        if (currentSection === '最大リスク') parsed.risk = parsed.risk ? `${parsed.risk} ${value}` : value;
-        if (currentSection === '承認条件') parsed.conditions.push(value);
-        if (currentSection === '判定' && !parsed.verdict) parsed.verdict = normalizeVerdict(value);
-    });
-
-    parsed.reasons = uniqueItems(parsed.reasons).slice(0, 3);
-    parsed.conditions = uniqueItems(parsed.conditions)
-        .filter(condition => !/^(条件なし|なし|特になし)$/u.test(condition));
-    parsed.verdict = parsed.verdict || normalizeVerdict(parsed.conclusion) || normalizeVerdict(text);
-    parsed.conclusion = parsed.conclusion || (parsed.verdict === 'approve' ? '承認' : parsed.verdict === 'reject' ? '否決' : '保留');
-    parsed.risk = parsed.risk || parsed.reasons[1] || parsed.reasons[0] || '主要リスクの明記なし';
-
-    return parsed;
+function normalizeVerdict(value) {
+    const normalized = cleanLine(value)
+        .replace(/[。．.!！?？]+$/u, '')
+        .trim();
+    if (!normalized) return null;
+    if (/^(?:条件付き)?承認(?:です)?$/u.test(normalized)) return 'approve';
+    if (/^(?:差し戻し|(?:条件付き)?否決)(?:です)?$/u.test(normalized)) return 'reject';
+    if (/^approve$/iu.test(normalized)) return 'approve';
+    if (/^reject$/iu.test(normalized)) return 'reject';
+    return null;
 }
 
-function getEffectiveConditions(panel) {
-    if (!panel) return [];
-    if (panel.conditions.length) return panel.conditions;
-    if (panel.verdict === 'reject') {
-        return [`${panel.risk}を解消すること`];
+function verdictLabel(verdict) {
+    return verdict === 'approve' ? '承認' : verdict === 'reject' ? '否決' : '保留';
+}
+
+function createStructuredError(code, message, status) {
+    const error = new Error(message);
+    error.code = code;
+    error.status = status;
+    return error;
+}
+
+function extractJsonPayload(text) {
+    const trimmed = String(text || '').trim();
+    const blockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/iu);
+    const candidate = (blockMatch ? blockMatch[1] : trimmed).trim();
+    const start = candidate.indexOf('{');
+    const end = candidate.lastIndexOf('}');
+
+    if (start === -1 || end === -1 || end < start) {
+        throw createStructuredError('FORMAT_ERROR', 'JSON payload not found');
     }
-    return [];
+
+    try {
+        return JSON.parse(candidate.slice(start, end + 1));
+    } catch {
+        throw createStructuredError('FORMAT_ERROR', 'JSON parse failed');
+    }
+}
+
+function sanitizePanelResponse(source, meta) {
+    if (!source || typeof source !== 'object' || Array.isArray(source)) {
+        throw createStructuredError('FORMAT_ERROR', `${meta.name} panel missing`);
+    }
+
+    const reasons = sanitizeArray(source.reasons).slice(0, 2);
+    const conditions = sanitizeArray(source.conditions)
+        .filter(condition => !/^(条件なし|なし|特になし)$/u.test(condition))
+        .slice(0, 2);
+    const verdict = normalizeVerdict(source.verdict) || normalizeVerdict(source.conclusion);
+
+    return {
+        name: meta.name,
+        badge: meta.badge,
+        conclusion: cleanLine(source.conclusion) || verdictLabel(verdict),
+        reasons,
+        risk: cleanLine(source.risk) || reasons[0] || '主要リスクの明記なし',
+        conditions,
+        verdict
+    };
 }
 
 function formatPanelResponse(panel) {
-    const conditions = getEffectiveConditions(panel);
-    const conditionLines = conditions.length ? conditions : ['条件なし'];
-    const verdictLabel = panel.verdict === 'approve' ? '承認' : panel.verdict === 'reject' ? '否決' : '保留';
     const reasons = panel.reasons.length ? panel.reasons : ['理由の抽出に失敗しました'];
+    const conditions = panel.conditions.length ? panel.conditions : ['条件なし'];
 
     return [
         `結論: ${panel.conclusion}`,
@@ -806,8 +835,8 @@ function formatPanelResponse(panel) {
         ...reasons.map(reason => `- ${reason}`),
         `最大リスク: ${panel.risk}`,
         '承認条件:',
-        ...conditionLines.map(condition => `- ${condition}`),
-        `判定: ${verdictLabel}`
+        ...conditions.map(condition => `- ${condition}`),
+        `判定: ${verdictLabel(panel.verdict)}`
     ].join('\n');
 }
 
@@ -821,9 +850,9 @@ function renderList(listEl, items, emptyMessage) {
     });
 }
 
-function buildPerspectiveSummary(keys) {
+function buildPerspectiveSummary(keys, panels) {
     const summaries = keys.map(key => {
-        const panel = panelStates[key];
+        const panel = panels[key];
         if (!panel) return null;
         const reason = summarizeText(panel.reasons[0] || panel.risk || panel.conclusion);
         return `${panel.name}: ${reason}`;
@@ -832,15 +861,23 @@ function buildPerspectiveSummary(keys) {
     return summaries.length ? summaries.join(' / ') : '要約を作成できませんでした。';
 }
 
-function collectHoldConditions(majorityVerdict) {
+function buildLatentMinoritySummary(panels) {
+    const risk = PANEL_KEYS
+        .map(key => cleanLine(panels[key]?.risk))
+        .find(Boolean);
+
+    return risk ? `満場一致だが最大の火種は ${summarizeText(risk, 28)}` : LATENT_MINORITY_TEXT;
+}
+
+function collectHoldConditions(majorityVerdict, panels) {
     const seen = new Set();
     const items = [];
 
     PANEL_KEYS.forEach(key => {
-        const panel = panelStates[key];
+        const panel = panels[key];
         if (!panel) return;
 
-        getEffectiveConditions(panel).forEach(condition => {
+        panel.conditions.forEach(condition => {
             const normalized = cleanLine(condition);
             if (!normalized || seen.has(normalized)) return;
             seen.add(normalized);
@@ -848,7 +885,7 @@ function collectHoldConditions(majorityVerdict) {
         });
     });
 
-    if (items.length) return items.slice(0, 6);
+    if (items.length) return items.slice(0, 4);
     if (majorityVerdict === 'approve') return ['追加条件なし'];
     return ['前提・被害対策・運用条件を具体化して再審議すること'];
 }
@@ -920,274 +957,334 @@ function getOutcomeState(approveCount, rejectCount, resolvedCount) {
     };
 }
 
-// ── SSE stream reader (bug-fixed) ─────────────────────────────
-// 修正点: done 時に残バッファを必ず処理 + TextDecoder を flush する
-async function readSSEStream(reader, onLine) {
-    const decoder = new TextDecoder();
-    let buf = '';
-    while (true) {
-        const { done, value } = await reader.read();
-        // done 時は decoder を flush して残バイトを取り出す
-        buf += done ? decoder.decode() : decoder.decode(value, { stream: true });
-        const lines = buf.split('\n');
-        // done でなければ末尾の不完全な行を次回に持ち越す
-        buf = done ? '' : (lines.pop() ?? '');
-        for (const line of lines) {
-            const raw = line.trim();
-            if (raw.startsWith('data: ')) onLine(raw.slice(6));
-        }
-        if (done) break;
+function buildValidatedDeliberation(rawText) {
+    const payload = extractJsonPayload(rawText);
+    if (!payload || typeof payload !== 'object' || !payload.panels) {
+        throw createStructuredError('FORMAT_ERROR', 'panels payload missing');
     }
+
+    const panels = Object.fromEntries(MAGI.map(meta => [
+        meta.key,
+        sanitizePanelResponse(payload.panels[meta.key], meta)
+    ]));
+
+    const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
+    const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
+    const resolvedCount = approveCount + rejectCount;
+    const outcome = getOutcomeState(approveCount, rejectCount, resolvedCount);
+    const majorityKeys = outcome.majorityVerdict
+        ? PANEL_KEYS.filter(key => panels[key].verdict === outcome.majorityVerdict)
+        : [];
+    const minorityKeys = outcome.majorityVerdict
+        ? PANEL_KEYS.filter(key => panels[key].verdict && panels[key].verdict !== outcome.majorityVerdict)
+        : [];
+
+    const rawConsensus = payload.consensus && typeof payload.consensus === 'object' ? payload.consensus : {};
+    const holdConditions = sanitizeArray(rawConsensus.hold_conditions).slice(0, 4);
+    const effectiveHoldConditions = holdConditions.length
+        ? holdConditions
+        : collectHoldConditions(outcome.majorityVerdict, panels);
+
+    return {
+        panels,
+        consensus: {
+            outcome,
+            voteSummary: `${approveCount} approve / ${rejectCount} reject`,
+            majorityView: cleanLine(rawConsensus.majority_view)
+                || (majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。'),
+            minorityView: cleanLine(rawConsensus.minority_view)
+                || (minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels)),
+            holdConditions: effectiveHoldConditions,
+            recommendedAction: cleanLine(rawConsensus.recommended_action)
+                || buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
+        }
+    };
 }
 
-// ── Gemini streaming ──────────────────────────────────────────
-async function callGemini(systemPrompt, query, apiKey, onText) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
-    const res = await fetch(url, {
+async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal,
         body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: 'user', parts: [{ text: query }] }],
-            generationConfig: { maxOutputTokens: 1024 }
-        })
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-    let blocked = false;
-    await readSSEStream(res.body.getReader(), raw => {
-        if (!raw) return;
-        try {
-            const ev = JSON.parse(raw);
-            const candidate = ev.candidates?.[0];
-            // 安全フィルターによるブロック検出
-            if (candidate?.finishReason === 'SAFETY' ||
-                candidate?.finishReason === 'PROHIBITED_CONTENT') {
-                blocked = true;
-                return;
+            contents: [{ role: 'user', parts: [{ text: `審議対象:\n${query}` }] }],
+            generationConfig: {
+                maxOutputTokens: 896,
+                temperature: 1.05
             }
-            const text = candidate?.content?.parts?.[0]?.text;
-            if (text) onText(text);
-        } catch { /* partial JSON は無視 */ }
-    });
-    if (blocked) throw new Error('[安全フィルターによりブロックされました]');
-}
-
-// ── OpenAI-compatible streaming (Groq / OpenRouter) ──────────
-async function callOpenAICompat(endpoint, apiKey, extraHeaders, model, systemPrompt, query, onText) {
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            ...extraHeaders
-        },
-        body: JSON.stringify({
-            model,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user',   content: query }
-            ],
-            stream: true,
-            max_tokens: 1024
         })
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
+
+    if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw createStructuredError('REQUEST_ERROR', errorPayload.error?.message || `HTTP ${response.status}`, response.status);
     }
-    await readSSEStream(res.body.getReader(), raw => {
-        if (!raw || raw === '[DONE]') return;
-        try {
-            const ev = JSON.parse(raw);
-            const text = ev.choices?.[0]?.delta?.content;
-            if (text) onText(text);
-        } catch { /* partial JSON は無視 */ }
+
+    const data = await response.json();
+    if (data.promptFeedback?.blockReason) {
+        throw createStructuredError('SAFETY', '[安全フィルターによりブロックされました]');
+    }
+
+    const candidate = data.candidates?.[0];
+    if (candidate?.finishReason === 'SAFETY' || candidate?.finishReason === 'PROHIBITED_CONTENT') {
+        throw createStructuredError('SAFETY', '[安全フィルターによりブロックされました]');
+    }
+
+    const text = candidate?.content?.parts
+        ?.map(part => part.text || '')
+        .join('')
+        .trim();
+
+    if (!text) {
+        throw createStructuredError('EMPTY', '[応答を受信できませんでした]');
+    }
+
+    return text;
+}
+
+function classifyError(error) {
+    const message = error?.message || '';
+
+    if (error?.code === 'FORMAT_ERROR') {
+        return {
+            code: 'FORMAT ERROR',
+            message: '構造化レスポンスの解析に失敗しました。もう一度実行してください。'
+        };
+    }
+
+    if (error?.code === 'EMPTY') {
+        return {
+            code: 'NO RESPONSE',
+            message: 'Gemini から審議本文を受信できませんでした。少し待って再試行してください。'
+        };
+    }
+
+    if (error?.code === 'SAFETY' || /safety|blocked|prohibited/i.test(message)) {
+        return {
+            code: 'SAFETY BLOCK',
+            message: '安全フィルターにより審議が返りませんでした。問いを言い換えてください。'
+        };
+    }
+
+    if (error?.status === 429 || /429|quota|rate|resource exhausted/i.test(message)) {
+        return {
+            code: 'RATE LIMITED',
+            message: '短時間に審議しすぎました。少し待ってから再試行してください。'
+        };
+    }
+
+    if ([400, 401, 403].includes(error?.status) || /api key|credential|permission|auth/i.test(message)) {
+        return {
+            code: 'AUTH ERROR',
+            message: 'APIキーが無効か権限が不足しています。Google AI Studio のキーを確認してください。'
+        };
+    }
+
+    return {
+        code: 'REQUEST ERROR',
+        message: 'Gemini から審議を取得できませんでした。ネットワークまたは一時的な障害の可能性があります。'
+    };
+}
+
+function panelElements(key) {
+    return {
+        bodyEl: document.getElementById(`body-${key}`),
+        vtEl: document.getElementById(`vt-${key}`),
+        stEl: document.getElementById(`st-${key}`),
+        swEl: document.getElementById(`sw-${key}`)
+    };
+}
+
+function clearConsensus() {
+    document.getElementById('consensus').classList.remove('show');
+    document.getElementById('voteRow').innerHTML = '';
+    document.getElementById('majoritySummary').textContent = '---';
+    document.getElementById('minoritySummary').textContent = '---';
+    document.getElementById('holdConditions').replaceChildren();
+    document.getElementById('actionPlan').textContent = '---';
+    document.getElementById('finalVerdict').textContent = '';
+    document.getElementById('finalVerdict').className = 'fv';
+    document.getElementById('finalDesc').textContent = '';
+}
+
+function setPanelPending(key, statusText = 'INTERNAL DELIBERATION') {
+    const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
+    bodyEl.textContent = '[ INTERNAL DELIBERATION ]\n> one Gemini request armed\n> local reveal queue active';
+    bodyEl.scrollTop = 0;
+    vtEl.textContent = '[ -- ]';
+    vtEl.className = 'vt';
+    stEl.textContent = statusText;
+    swEl.classList.add('on');
+    verdicts[key] = null;
+    panelStates[key] = null;
+}
+
+function renderPanel(key, panel) {
+    const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
+    panelStates[key] = panel;
+    verdicts[key] = panel.verdict;
+    bodyEl.textContent = formatPanelResponse(panel);
+    bodyEl.scrollTop = 0;
+    vtEl.textContent = panel.verdict === 'approve'
+        ? '▶ 承認'
+        : panel.verdict === 'reject'
+            ? '▶ 否決'
+            : '[ ??? ]';
+    vtEl.className = panel.verdict ? `vt ${panel.verdict}` : 'vt';
+    stEl.textContent = panel.verdict ? 'COMPLETE' : 'PARTIAL';
+    swEl.classList.remove('on');
+}
+
+function renderGlobalError(info) {
+    clearConsensus();
+    PANEL_KEYS.forEach(key => {
+        const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
+        bodyEl.textContent = `[${info.code}]\n${info.message}`;
+        vtEl.textContent = '[ ERR ]';
+        vtEl.className = 'vt';
+        stEl.textContent = info.code;
+        swEl.classList.remove('on');
+        verdicts[key] = null;
+        panelStates[key] = null;
     });
 }
 
-// ── Stream one MAGI panel ─────────────────────────────────────
-async function streamMagi(magi, query, keys) {
-    const { key, provider, system } = magi;
-    const bodyEl = document.getElementById(`body-${key}`);
-    const vtEl   = document.getElementById(`vt-${key}`);
-    const stEl   = document.getElementById(`st-${key}`);
-    const swEl   = document.getElementById(`sw-${key}`);
-
-    bodyEl.textContent = '';
-    vtEl.textContent   = '[ -- ]';
-    vtEl.className     = 'vt';
-    stEl.textContent   = 'PROCESSING...';
-    swEl.classList.add('on');
-    panelStates[key]   = null;
-
-    let full = '';
-    const onText = text => {
-        full += text;
-        bodyEl.textContent = full;
-        bodyEl.scrollTop = bodyEl.scrollHeight;
-    };
-
-    try {
-        if (provider === 'gemini') {
-            await callGemini(system, query, keys.gemini, onText);
-
-        } else if (provider === 'groq') {
-            await callOpenAICompat(
-                'https://api.groq.com/openai/v1/chat/completions',
-                keys.groq,
-                {},
-                'llama-3.3-70b-versatile',
-                system, query, onText
-            );
-
-        } else if (provider === 'openrouter') {
-            await callOpenAICompat(
-                'https://openrouter.ai/api/v1/chat/completions',
-                keys.openrouter,
-                { 'HTTP-Referer': location.href, 'X-Title': 'MAGI System' },
-                'mistralai/mistral-7b-instruct:free',
-                system, query, onText
-            );
-        }
-
-        // ストリーム完了後に空だった場合のハンドリング
-        if (!full.trim()) {
-            bodyEl.textContent = '[応答を受信できませんでした]';
-            stEl.textContent   = 'NO RESPONSE';
-            vtEl.textContent   = '[ N/A ]';
-            verdicts[key]      = null;
-            return;
-        }
-
-        const parsed = parsePanelResponse(full);
-        panelStates[key]   = { ...parsed, name: magi.name, badge: magi.badge };
-        verdicts[key]      = parsed.verdict;
-        bodyEl.textContent = formatPanelResponse(panelStates[key]);
-        vtEl.textContent   = parsed.verdict === 'approve' ? '▶ 承認' : parsed.verdict === 'reject' ? '▶ 否決' : '[ ??? ]';
-        vtEl.className     = parsed.verdict ? `vt ${parsed.verdict}` : 'vt';
-        stEl.textContent   = 'COMPLETE';
-
-    } catch (e) {
-        bodyEl.textContent = `[ERROR]\n${e.message}`;
-        stEl.textContent   = 'ERROR';
-        vtEl.textContent   = '[ ERR ]';
-        verdicts[key]      = null;
-        panelStates[key]   = null;
-    } finally {
-        swEl.classList.remove('on');
-    }
-}
-
-// ── Show consensus ─────────────────────────────────────────────
-function showConsensus() {
-    const labels = { b: 'BALTHASAR', c: 'CASPAR', m: 'MELCHIOR' };
+function showConsensus(consensus) {
     const voteRow = document.getElementById('voteRow');
     const majoritySummaryEl = document.getElementById('majoritySummary');
     const minoritySummaryEl = document.getElementById('minoritySummary');
-    const holdConditionsEl  = document.getElementById('holdConditions');
-    const actionPlanEl      = document.getElementById('actionPlan');
+    const holdConditionsEl = document.getElementById('holdConditions');
+    const actionPlanEl = document.getElementById('actionPlan');
+    const fv = document.getElementById('finalVerdict');
+    const fd = document.getElementById('finalDesc');
+    const outcome = consensus?.outcome || getOutcomeState(
+        Object.values(verdicts).filter(v => v === 'approve').length,
+        Object.values(verdicts).filter(v => v === 'reject').length,
+        Object.values(verdicts).filter(Boolean).length
+    );
 
-    voteRow.innerHTML = PANEL_KEYS.map(k => {
-        const v   = verdicts[k];
-        const cls = v === 'approve' ? 'approve' : v === 'reject' ? 'reject' : 'pending';
-        const lbl = v === 'approve' ? '承認' : v === 'reject' ? '否決' : '??';
+    voteRow.innerHTML = PANEL_KEYS.map(key => {
+        const verdict = verdicts[key];
+        const cls = verdict === 'approve' ? 'approve' : verdict === 'reject' ? 'reject' : 'pending';
+        const label = verdict === 'approve' ? '承認' : verdict === 'reject' ? '否決' : '??';
         return `<div class="vote-item">
-            <div class="vote-circle ${cls}">${lbl}</div>
-            <div class="vote-name">${labels[k]}</div>
+            <div class="vote-circle ${cls}">${label}</div>
+            <div class="vote-name">${PANEL_LABELS[key]}</div>
         </div>`;
     }).join('');
 
-    const vals = Object.values(verdicts);
-    const ap   = vals.filter(v => v === 'approve').length;
-    const rj   = vals.filter(v => v === 'reject').length;
-    const done = ap + rj;
-    const fv   = document.getElementById('finalVerdict');
-    const fd   = document.getElementById('finalDesc');
-    const outcome = getOutcomeState(ap, rj, done);
-    const majorityKeys = outcome.majorityVerdict
-        ? PANEL_KEYS.filter(key => verdicts[key] === outcome.majorityVerdict)
-        : [];
-    const minorityKeys = outcome.majorityVerdict
-        ? PANEL_KEYS.filter(key => verdicts[key] && verdicts[key] !== outcome.majorityVerdict)
-        : [];
-    const holdConditions = collectHoldConditions(outcome.majorityVerdict);
-
     fv.textContent = outcome.finalText;
-    fv.className   = outcome.finalClass;
-    fd.textContent = outcome.desc;
-    majoritySummaryEl.textContent = majorityKeys.length
-        ? buildPerspectiveSummary(majorityKeys)
-        : '多数派の要約を作れませんでした。';
-    minoritySummaryEl.textContent = minorityKeys.length
-        ? buildPerspectiveSummary(minorityKeys)
-        : '満場一致のため少数意見はありません。';
-    renderList(holdConditionsEl, holdConditions, '追加条件なし');
-    actionPlanEl.textContent = buildActionPlan(outcome.majorityVerdict, minorityKeys, holdConditions);
+    fv.className = outcome.finalClass;
+    fd.textContent = `${consensus?.voteSummary || outcome.desc} // SINGLE REQUEST / LOCAL REVEAL`;
+    majoritySummaryEl.textContent = consensus?.majorityView || '多数派の要約を作れませんでした。';
+    minoritySummaryEl.textContent = consensus?.minorityView || LATENT_MINORITY_TEXT;
+    renderList(holdConditionsEl, consensus?.holdConditions || [], '追加条件なし');
+    actionPlanEl.textContent = consensus?.recommendedAction || '推奨アクションを生成できませんでした。';
     document.getElementById('consensus').classList.add('show');
 }
 
-// ── Execute ────────────────────────────────────────────────────
+async function revealDeliberation(data, runId) {
+    for (const key of PANEL_KEYS) {
+        if (runId !== activeRunId) return;
+        panelElements(key).stEl.textContent = 'REVEALING...';
+        await wait(PANEL_REVEAL_DELAY);
+        if (runId !== activeRunId) return;
+        renderPanel(key, data.panels[key]);
+    }
+
+    if (runId !== activeRunId) return;
+    await wait(CONSENSUS_REVEAL_DELAY);
+    if (runId !== activeRunId) return;
+    showConsensus(data.consensus);
+}
+
+function abortActiveRequest() {
+    if (activeController) {
+        activeController.abort();
+        activeController = null;
+    }
+}
+
 async function execute() {
-    const keys = {
-        gemini: document.getElementById('keyGemini').value.trim()
-    };
+    const apiKey = document.getElementById('keyGemini').value.trim();
     const query = document.getElementById('queryInput').value.trim();
 
-    if (!keys.gemini) {
+    if (!apiKey) {
         document.getElementById('apiBody').classList.add('open');
         document.getElementById('apiIcon').textContent = '∧';
         alert('APIキーが未入力です。\n下の「API KEY 設定」セクションを確認してください。');
         return;
     }
-    if (!query) { alert('質問を入力してください'); return; }
+    if (!query) {
+        alert('質問を入力してください');
+        return;
+    }
+
+    activeRunId += 1;
+    const runId = activeRunId;
+    abortActiveRequest();
+    const controller = new AbortController();
+    activeController = controller;
 
     const btn = document.getElementById('startBtn');
-    btn.disabled    = true;
+    btn.disabled = true;
     btn.textContent = '▶ PROCESSING...';
 
-    PANEL_KEYS.forEach(key => {
-        verdicts[key] = null;
-        panelStates[key] = null;
-    });
-    document.getElementById('consensus').classList.remove('show');
+    clearConsensus();
+    PANEL_KEYS.forEach(key => setPanelPending(key));
     document.getElementById('motionDisplay').textContent = `MOTION: ${query}`;
 
     try {
-        // リクエストを700msずつずらしてGeminiのレート制限を回避
-        await Promise.all(MAGI.map((m, i) =>
-            new Promise(r => setTimeout(r, i * 700)).then(() => streamMagi(m, query, keys))
-        ));
+        const raw = await callGeminiOnce(buildSingleMagiPrompt(), query, apiKey, controller.signal);
+        if (runId !== activeRunId) return;
 
-        showConsensus();
+        const data = buildValidatedDeliberation(raw);
+        if (runId !== activeRunId) return;
+
+        document.getElementById('motionDisplay').textContent = `MOTION: ${query} // LOCAL REVEAL`;
+        await revealDeliberation(data, runId);
+    } catch (error) {
+        if (error?.name === 'AbortError' || runId !== activeRunId) return;
+        renderGlobalError(classifyError(error));
     } finally {
-        btn.disabled    = false;
-        btn.textContent = '▶ START';
+        if (activeController === controller) {
+            activeController = null;
+        }
+        if (runId === activeRunId) {
+            btn.disabled = false;
+            btn.textContent = '▶ START';
+        }
     }
 }
 
-// ── Reset ──────────────────────────────────────────────────────
 function resetAll() {
-    PANEL_KEYS.forEach(k => {
-        document.getElementById(`body-${k}`).textContent = '';
-        document.getElementById(`sw-${k}`).classList.remove('on');
-        const vt = document.getElementById(`vt-${k}`);
-        vt.textContent = '[ STANDBY ]';
-        vt.className   = 'vt';
-        document.getElementById(`st-${k}`).textContent = 'ONLINE';
-        verdicts[k] = null;
-        panelStates[k] = null;
+    activeRunId += 1;
+    abortActiveRequest();
+
+    const btn = document.getElementById('startBtn');
+    btn.disabled = false;
+    btn.textContent = '▶ START';
+
+    PANEL_KEYS.forEach(key => {
+        const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
+        bodyEl.textContent = '';
+        vtEl.textContent = '[ STANDBY ]';
+        vtEl.className = 'vt';
+        stEl.textContent = 'ONLINE';
+        swEl.classList.remove('on');
+        verdicts[key] = null;
+        panelStates[key] = null;
     });
-    document.getElementById('consensus').classList.remove('show');
+
+    clearConsensus();
     document.getElementById('queryInput').value = '';
     document.getElementById('motionDisplay').textContent = '— AWAIT CONFLICT QUERY —';
 }
 
-// Ctrl+Enter
-document.getElementById('queryInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) execute();
+document.getElementById('queryInput').addEventListener('keydown', event => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) execute();
 });
 </script>
 </body>
