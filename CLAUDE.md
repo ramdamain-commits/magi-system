@@ -1,4 +1,4 @@
-# MAGI System - Project Guide
+﻿# MAGI System - Project Guide
 
 ## 概要
 エヴァンゲリオン風の意思決定 UI アプリ。3つの AI パネル（BALTHASAR / CASPAR / MELCHIOR）の審議を 1 回の Gemini リクエストから生成し、合議はローカルで合成して段階表示する。
@@ -13,6 +13,7 @@
 - `index.html` — メインアプリ（現行バージョン）
 - `docs/UPDATE_POLICY.md` — 開発目的と更新方針
 - `CHANGELOG.md` — 変更履歴
+- `.github/pull_request_template.md` — 日本語 PR テンプレート
 
 ## 技術スタック
 - 純粋な HTML / CSS / Vanilla JS（ビルド不要）
@@ -33,6 +34,9 @@
 - CSS 変数（`--amber` 等）でテーマカラーを管理
 - モバイル対応必須（`max-width: 500px` のメディアクエリあり）
 - 仕様変更時は `README.md`、`CHANGELOG.md`、関連ドキュメントの更新要否を確認する
+- ドキュメントと GitHub PR は原則として日本語で書く
+- テキストの文字コードは `.editorconfig` を正とし、Markdown と PowerShell は UTF-8 BOM、その他のテキストは UTF-8 を基本にする
+- GitHub PR は `.github/pull_request_template.md` を使い、必要なら `C:\Users\ramda\projects\setting\Run-GitHubPrCreate.cmd` を使う
 - 通信方式や JSON 契約を変える時は、描画ロジックとドキュメントを同時に更新する
 
 ## Git / GitHub

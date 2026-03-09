@@ -1,4 +1,15 @@
-# Changelog
+﻿# Changelog
+
+## 2026-03-09
+
+### Added
+
+- `.editorconfig` を追加し、Markdown と PowerShell を UTF-8 BOM、その他テキストを UTF-8 で扱う編集規約を明示した
+- `.github/pull_request_template.md` を追加し、日本語 PR の目的、影響範囲、確認内容を揃えやすくした
+
+### Changed
+
+- `README.md` と `docs/UPDATE_POLICY.md`、`AGENTS.md`、`CLAUDE.md` に文書言語と文字コード運用を追記した
 
 ## 2026-03-08
 
