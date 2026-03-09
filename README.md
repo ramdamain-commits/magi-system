@@ -1,4 +1,4 @@
-# MAGI System
+﻿# MAGI System
 
 MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議させ、重要な判断の blind spot を見つけるための実験的な意思決定 UI です。現在は 1 回の Gemini リクエストで 3 人格の審議だけを生成し、合議は UI 側で合成することで、ゲーム性を保ったまま API 負荷を抑えています。
 
@@ -50,5 +50,8 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 - パネル人格を変える時は、UI 表示文言とプロンプトを同時に更新する
 - 出力フォーマットや通信方式を変える時は、描画ロジックとドキュメントも一緒に更新する
 - 機能変更時は `README.md`、`CHANGELOG.md`、関連ドキュメントの更新要否を必ず確認する
+- ドキュメントと GitHub PR は原則として日本語で書く
+- テキストの文字コードは `.editorconfig` を正とし、Markdown と PowerShell は UTF-8 BOM、その他のテキストは UTF-8 を基本にする
+- GitHub PR は `.github/pull_request_template.md` を使い、必要なら `C:\Users\ramda\projects\setting\Run-GitHubPrCreate.cmd` を使って本文ファイルを UTF-8 で生成する
 
 詳細方針は [docs/UPDATE_POLICY.md](docs/UPDATE_POLICY.md) を参照してください。

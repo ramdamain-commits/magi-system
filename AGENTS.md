@@ -1,7 +1,7 @@
-# MAGI System - Project Guide
+﻿# MAGI System - Project Guide
 
 ## 概要
-エヴァンゲリオン風の意思決定UIアプリ。3つのAIパネル（BALTHASAR/CASPAR/MELCHIOR）がGemini APIで並列審議し、対立・少数意見・承認条件を可視化する。
+エヴァンゲリオン風の意思決定UIアプリ。3つのAIパネル（BALTHASAR/CASPAR/MELCHIOR）の審議を1回のGeminiリクエストから生成し、合議はローカルで合成して対立・少数意見・承認条件を可視化する。
 
 ## 開発目的
 - 重要な判断を AI に委任するのではなく、異なる価値観を衝突させて blind spot を減らす
@@ -12,10 +12,11 @@
 - `index.html` — メインアプリ（現行バージョン）
 - `docs/UPDATE_POLICY.md` — 開発目的と更新方針
 - `CHANGELOG.md` — 変更履歴
+- `.github/pull_request_template.md` — 日本語 PR テンプレート
 
 ## 技術スタック
 - 純粋な HTML / CSS / Vanilla JS（ビルド不要）
-- Gemini API（`generativelanguage.googleapis.com`）でストリーミング
+- Gemini API（`generativelanguage.googleapis.com`）を1回呼び、構造化レスポンスを受け取る
 - APIキーはブラウザのみで処理、サーバー送信なし
 
 ## 開発サーバー
@@ -31,6 +32,9 @@
 - CSS 変数（`--amber` 等）でテーマカラーを管理
 - モバイル対応必須（`max-width: 500px` のメディアクエリあり）
 - 仕様変更時は `README.md`、`CHANGELOG.md`、関連ドキュメントの更新要否を確認する
+- ドキュメントと GitHub PR は原則として日本語で書く
+- テキストの文字コードは `.editorconfig` を正とし、Markdown と PowerShell は UTF-8 BOM、その他のテキストは UTF-8 を基本にする
+- GitHub PR は `.github/pull_request_template.md` を使い、必要なら `C:\Users\ramda\projects\setting\Run-GitHubPrCreate.cmd` を使う
 
 ## Git / GitHub
 - メインブランチ: `main`
