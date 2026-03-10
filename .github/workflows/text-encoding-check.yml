@@ -1,0 +1,22 @@
+name: Text Encoding Check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  text-encoding-check:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run text encoding check
+        shell: pwsh
+        run: ./scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning
