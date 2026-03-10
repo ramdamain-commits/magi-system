@@ -53,5 +53,6 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 - ドキュメントと GitHub PR は原則として日本語で書く
 - テキストの文字コードは `.editorconfig` を正とし、Markdown と PowerShell は UTF-8 BOM、その他のテキストは UTF-8 を基本にする
 - GitHub PR は `.github/pull_request_template.md` を使い、必要なら `C:\Users\ramda\projects\setting\Run-GitHubPrCreate.cmd` を使って本文ファイルを UTF-8 で生成する
+- PR では `.github/workflows/text-encoding-check.yml` が `scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning` を実行する
 
 詳細方針は [docs/UPDATE_POLICY.md](docs/UPDATE_POLICY.md) を参照してください。
