@@ -172,20 +172,191 @@ function Get-DetectedEncoding {
     }
 }
 
+function Convert-EditorConfigCharset {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Charset
+    )
+
+    switch ($Charset.Trim().ToLowerInvariant()) {
+        "utf-8" { return "utf8" }
+        "utf-8-bom" { return "utf8-bom" }
+        "utf-16le" { return "utf16le" }
+        "utf-16be" { return "utf16be" }
+        default { return $null }
+    }
+}
+
+function Expand-EditorConfigPattern {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $match = [System.Text.RegularExpressions.Regex]::Match($Pattern, "\{[^{}]+\}")
+    if (-not $match.Success) {
+        return @($Pattern)
+    }
+
+    $prefix = $Pattern.Substring(0, $match.Index)
+    $suffix = $Pattern.Substring($match.Index + $match.Length)
+    $options = $match.Value.TrimStart([char[]]@("{")).TrimEnd([char[]]@("}")) -split ","
+    $expanded = New-Object System.Collections.Generic.List[string]
+
+    foreach ($option in $options) {
+        foreach ($candidate in (Expand-EditorConfigPattern -Pattern ($prefix + $option + $suffix))) {
+            $expanded.Add($candidate)
+        }
+    }
+
+    return $expanded.ToArray()
+}
+
+function Convert-EditorConfigPatternToRegex {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $normalizedPattern = $Pattern.Replace("\", "/")
+    $builder = New-Object System.Text.StringBuilder
+    [void]$builder.Append("^")
+
+    for ($index = 0; $index -lt $normalizedPattern.Length; $index++) {
+        $character = $normalizedPattern[$index]
+
+        if ($character -eq "*") {
+            $isDoubleStar = ($index + 1 -lt $normalizedPattern.Length) -and ($normalizedPattern[$index + 1] -eq "*")
+            if ($isDoubleStar) {
+                [void]$builder.Append(".*")
+                $index += 1
+            }
+            else {
+                [void]$builder.Append("[^/]*")
+            }
+
+            continue
+        }
+
+        if ($character -eq "?") {
+            [void]$builder.Append("[^/]")
+            continue
+        }
+
+        [void]$builder.Append([System.Text.RegularExpressions.Regex]::Escape([string]$character))
+    }
+
+    [void]$builder.Append("$")
+    return $builder.ToString()
+}
+
+function Test-EditorConfigPatternMatch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern,
+        [Parameter(Mandatory = $true)]
+        [string]$RelativePath
+    )
+
+    $normalizedRelativePath = $RelativePath.Replace("\", "/")
+    $target = if ($Pattern.Contains("/")) {
+        $normalizedRelativePath
+    }
+    else {
+        [System.IO.Path]::GetFileName($normalizedRelativePath)
+    }
+
+    foreach ($candidatePattern in (Expand-EditorConfigPattern -Pattern $Pattern)) {
+        $regexPattern = Convert-EditorConfigPatternToRegex -Pattern $candidatePattern
+        if ($target -match $regexPattern) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Get-EditorConfigCharsetRules {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$EditorConfigPath
+    )
+
+    if (-not (Test-Path -LiteralPath $EditorConfigPath)) {
+        return @()
+    }
+
+    $rules = New-Object System.Collections.Generic.List[object]
+    $currentPattern = $null
+
+    foreach ($line in Get-Content -LiteralPath $EditorConfigPath) {
+        $trimmed = $line.Trim()
+
+        if (-not $trimmed -or $trimmed.StartsWith("#") -or $trimmed.StartsWith(";")) {
+            continue
+        }
+
+        if ($trimmed -match "^\[(.+)\]$") {
+            $currentPattern = $matches[1].Trim()
+            continue
+        }
+
+        if (-not $currentPattern) {
+            continue
+        }
+
+        $parts = $trimmed -split "\s*=\s*", 2
+        if ($parts.Count -ne 2) {
+            continue
+        }
+
+        $key = $parts[0].Trim().ToLowerInvariant()
+        if ($key -ne "charset") {
+            continue
+        }
+
+        $normalizedCharset = Convert-EditorConfigCharset -Charset $parts[1]
+        if ($null -eq $normalizedCharset) {
+            continue
+        }
+
+        $rules.Add([pscustomobject]@{
+                Pattern  = $currentPattern
+                Encoding = $normalizedCharset
+            })
+    }
+
+    return $rules.ToArray()
+}
+
 function Get-RecommendedPolicy {
     param(
         [Parameter(Mandatory = $true)]
-        [System.IO.FileInfo]$File
+        [System.IO.FileInfo]$File,
+        [Parameter(Mandatory = $true)]
+        [string]$RootPath,
+        [Parameter(Mandatory = $true)]
+        [object[]]$CharsetRules
     )
 
-    if ($File.Extension.ToLowerInvariant() -in @(".md", ".ps1", ".psm1", ".psd1")) {
-        return "prefer-bom"
+    $relativePath = $File.FullName.Substring($RootPath.Length).TrimStart('\', '/')
+    $matchedEncoding = $null
+
+    foreach ($rule in $CharsetRules) {
+        if (Test-EditorConfigPatternMatch -Pattern $rule.Pattern -RelativePath $relativePath) {
+            $matchedEncoding = $rule.Encoding
+        }
     }
 
-    return "utf8"
+    if ($null -eq $matchedEncoding) {
+        return "utf8"
+    }
+
+    return $matchedEncoding
 }
 
 $rootPath = Get-RootFullPath -Path $Root
+$charsetRules = Get-EditorConfigCharsetRules -EditorConfigPath (Join-Path $rootPath ".editorconfig")
 if ($Recurse) {
     $targets = Get-TargetFiles -BasePath $rootPath -RecurseAll
 }
@@ -201,35 +372,36 @@ $results = New-Object System.Collections.Generic.List[object]
 foreach ($file in $targets) {
     $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
     $encoding = Get-DetectedEncoding -Bytes $bytes
-    $policy = Get-RecommendedPolicy -File $file
+    $policy = Get-RecommendedPolicy -File $file -RootPath $rootPath -CharsetRules $charsetRules
     $status = "OK"
-    $note = ""
+    $note = switch ($encoding) {
+        "utf8-bom" { "UTF-8 with BOM" }
+        "utf8" { "UTF-8" }
+        "utf16le" { "UTF-16 LE" }
+        "utf16be" { "UTF-16 BE" }
+        default { "non UTF-8" }
+    }
 
-    switch ($encoding) {
-        "utf8-bom" {
-            $note = "UTF-8 with BOM"
+    if ($policy -eq "utf8-bom") {
+        if ($encoding -eq "utf8") {
+            $status = "WARN"
+            $note = "UTF-8 without BOM"
         }
-        "utf8" {
-            if ($policy -eq "prefer-bom") {
-                $status = "WARN"
-                $note = "UTF-8 without BOM"
-            }
-            else {
-                $note = "UTF-8"
-            }
-        }
-        "utf16le" {
+        elseif ($encoding -ne "utf8-bom") {
             $status = "FAIL"
-            $note = "UTF-16 LE"
         }
-        "utf16be" {
+    }
+    elseif ($policy -eq "utf8") {
+        if ($encoding -eq "utf8-bom") {
+            $status = "WARN"
+            $note = "UTF-8 with BOM (unexpected)"
+        }
+        elseif ($encoding -ne "utf8") {
             $status = "FAIL"
-            $note = "UTF-16 BE"
         }
-        default {
-            $status = "FAIL"
-            $note = "non UTF-8"
-        }
+    }
+    elseif ($encoding -ne $policy) {
+        $status = "FAIL"
     }
 
     $results.Add([pscustomobject]@{

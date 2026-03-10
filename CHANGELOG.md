@@ -11,6 +11,7 @@
 ### Changed
 
 - `README.md` と `docs/UPDATE_POLICY.md`、`AGENTS.md`、`CLAUDE.md` に文書言語と文字コード運用を追記した
+- `scripts/Test-TextEncoding.ps1` が `.editorconfig` の `charset` 定義を参照して判定するようにし、文字コード運用の source of truth と実装を揃えた
 
 ## 2026-03-08
 
