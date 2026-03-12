@@ -28,6 +28,44 @@ foreach ($name in @(
     [void]$SkippedDirectoryNames.Add($name)
 }
 
+$BinaryExtensions = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($extension in @(
+         ".7z",
+         ".avi",
+         ".bmp",
+         ".class",
+         ".dll",
+         ".dylib",
+         ".eot",
+         ".exe",
+         ".gif",
+         ".gz",
+         ".ico",
+         ".jar",
+         ".jpeg",
+         ".jpg",
+         ".mp3",
+         ".mp4",
+         ".mov",
+         ".otf",
+         ".pdf",
+         ".pdb",
+         ".png",
+         ".rar",
+         ".so",
+         ".tar",
+         ".tgz",
+         ".ttf",
+         ".wav",
+         ".webm",
+         ".webp",
+         ".woff",
+         ".woff2",
+         ".zip"
+    )) {
+    [void]$BinaryExtensions.Add($extension)
+}
+
 function Get-RootFullPath {
     param(
         [Parameter(Mandatory = $true)]
@@ -43,18 +81,7 @@ function Test-TargetFile {
         [System.IO.FileInfo]$File
     )
 
-    $knownNames = @("README.md", "CHANGELOG.md", "AGENTS.md", "CLAUDE.md", ".editorconfig")
-    $knownExtensions = @(".md", ".ps1", ".psm1", ".psd1", ".cmd", ".bat", ".yml", ".yaml")
-
-    if ($knownNames -contains $File.Name) {
-        return $true
-    }
-
-    if ($knownExtensions -contains $File.Extension.ToLowerInvariant()) {
-        return $true
-    }
-
-    return $false
+    return -not $BinaryExtensions.Contains($File.Extension.ToLowerInvariant())
 }
 
 function Test-SkippedDirectory {
@@ -99,6 +126,42 @@ function Get-TargetFilesFromTree {
     return @($files.Values | Sort-Object FullName)
 }
 
+function Get-TargetFilesFromGit {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BasePath
+    )
+
+    if (-not (Test-Path -LiteralPath (Join-Path $BasePath ".git"))) {
+        return @()
+    }
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        return @()
+    }
+
+    $files = [System.Collections.Generic.Dictionary[string, System.IO.FileInfo]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($relativePath in @(git -C $BasePath ls-files)) {
+        if (-not $relativePath) {
+            continue
+        }
+
+        $fullPath = Join-Path $BasePath $relativePath
+        if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+            continue
+        }
+
+        $file = Get-Item -LiteralPath $fullPath
+        if (-not (Test-TargetFile -File $file)) {
+            continue
+        }
+
+        $files[$file.FullName] = $file
+    }
+
+    return @($files.Values | Sort-Object FullName)
+}
+
 function Get-TargetFiles {
     param(
         [Parameter(Mandatory = $true)]
@@ -109,6 +172,11 @@ function Get-TargetFiles {
     $files = [System.Collections.Generic.Dictionary[string, System.IO.FileInfo]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
     if ($RecurseAll) {
+        $trackedFiles = @(Get-TargetFilesFromGit -BasePath $BasePath)
+        if ($trackedFiles.Count -gt 0) {
+            return $trackedFiles
+        }
+
         return @(Get-TargetFilesFromTree -BasePath $BasePath)
     }
 
