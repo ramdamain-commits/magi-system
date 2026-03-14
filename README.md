@@ -40,6 +40,7 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 
 - `index.html` : 現行アプリ
 - `docs/UPDATE_POLICY.md` : 開発目的と更新方針
+- `docs/HANDOFF.md` : 別スレッドへ渡すための現状整理と次タスク
 - `CHANGELOG.md` : 変更履歴
 
 旧試作の `magi.html` と `magi2.html` は、現行仕様との乖離と競合混入を避けるため削除する。
