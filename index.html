@@ -8,6 +8,7 @@
         :root {
             --amber: #ffaa00;
             --amber-dim: #7a5000;
+            --amber-soft: #c7931f;
             --amber-glow: rgba(255,170,0,0.3);
             --blue-bg: #00122e;
             --blue-accent: #3388ff;
@@ -16,6 +17,12 @@
             --grn-bg: #001a00;
             --grn-accent: #22ff66;
             --bg: #080808;
+            --text-main: #d9c18b;
+            --text-soft: #b88a22;
+            --danger: #ff6b4a;
+            --danger-bg: rgba(120, 20, 0, 0.22);
+            --ok-bg: rgba(0, 64, 24, 0.32);
+            --info-bg: rgba(0, 40, 92, 0.28);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,6 +33,7 @@
             font-family: 'Courier New', Courier, monospace;
             min-height: 100vh;
             overflow-x: hidden;
+            line-height: 1.5;
         }
 
         /* Scanlines */
@@ -35,7 +43,7 @@
             inset: 0;
             background: repeating-linear-gradient(
                 0deg, transparent, transparent 2px,
-                rgba(0,0,0,0.13) 2px, rgba(0,0,0,0.13) 3px
+                rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px
             );
             pointer-events: none;
             z-index: 9999;
@@ -56,10 +64,11 @@
         .statusbar {
             background: var(--amber);
             color: #000;
-            font-size: .62em;
-            padding: 3px 10px;
+            font-size: .7em;
+            padding: 4px 10px;
             display: flex;
             justify-content: space-between;
+            gap: 12px;
             letter-spacing: .08em;
             font-weight: bold;
         }
@@ -68,28 +77,141 @@
         .title-area {
             border: 2px solid var(--amber);
             border-top: none;
-            padding: 8px 12px 10px;
+            padding: 10px 12px 12px;
             text-align: center;
             animation: flicker 7s infinite;
         }
         .title-label {
-            font-size: .55em;
-            color: var(--amber-dim);
-            letter-spacing: .45em;
-            margin-bottom: 3px;
+            font-size: .68em;
+            color: var(--amber-soft);
+            letter-spacing: .28em;
+            margin-bottom: 5px;
         }
         .title-motion {
-            font-size: 1.05em;
-            letter-spacing: .2em;
+            font-size: 1.2em;
+            letter-spacing: .14em;
             color: var(--amber);
             text-shadow: 0 0 12px var(--amber);
             word-break: break-all;
             min-height: 1.4em;
         }
 
+        .quickstart {
+            margin: 12px 10px 10px;
+            border: 1px solid var(--amber-dim);
+            background: #0b0903;
+            padding: 12px;
+        }
+        .quickstart-label {
+            font-size: .72em;
+            color: var(--amber-soft);
+            letter-spacing: .22em;
+            margin-bottom: 10px;
+        }
+        .quickstart-steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .step-card {
+            border: 1px solid #3b2b08;
+            background: #050505;
+            padding: 10px;
+            min-height: 78px;
+        }
+        .step-index {
+            display: block;
+            font-size: .66em;
+            color: var(--amber-soft);
+            letter-spacing: .18em;
+            margin-bottom: 6px;
+        }
+        .step-text {
+            font-size: .82em;
+            line-height: 1.65;
+            color: var(--text-main);
+        }
+
+        .setup-wrap {
+            margin: 0 10px 10px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .mode-section,
+        .api-section {
+            border: 1px solid var(--amber-dim);
+            background: #090909;
+        }
+        .section-heading {
+            font-size: .74em;
+            color: var(--amber-soft);
+            letter-spacing: .2em;
+            padding: 10px 12px 0;
+        }
+        .section-note {
+            font-size: .76em;
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 6px 12px 12px;
+        }
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            padding: 0 12px 12px;
+        }
+        .mode-card {
+            position: relative;
+            display: block;
+            cursor: pointer;
+        }
+        .mode-card input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .mode-card-body {
+            border: 1px solid #40300a;
+            background: #050505;
+            padding: 12px;
+            min-height: 116px;
+            transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+        .mode-card:hover .mode-card-body {
+            border-color: var(--amber);
+            transform: translateY(-1px);
+        }
+        .mode-card input:checked + .mode-card-body {
+            border-color: var(--amber);
+            box-shadow: 0 0 18px rgba(255,170,0,.14);
+        }
+        .mode-card-title {
+            display: block;
+            font-size: .84em;
+            font-weight: bold;
+            letter-spacing: .18em;
+            margin-bottom: 6px;
+            color: var(--amber);
+        }
+        .mode-card-meta {
+            display: block;
+            font-size: .68em;
+            color: var(--amber-soft);
+            margin-bottom: 8px;
+            letter-spacing: .08em;
+        }
+        .mode-card-copy {
+            display: block;
+            font-size: .76em;
+            color: var(--text-main);
+            line-height: 1.7;
+        }
+
         /* ━━ PANELS ━━ */
         .panels-wrap {
-            margin: 10px;
+            margin: 0 10px 10px;
             border: 2px solid var(--amber);
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -181,8 +303,8 @@
         .ph-id { font-size: .55em; opacity: .6; }
 
         .ph-role {
-            font-size: .55em;
-            opacity: .55;
+            font-size: .72em;
+            opacity: .8;
             padding: 3px 10px 4px;
             letter-spacing: .05em;
             flex-shrink: 0;
@@ -194,17 +316,17 @@
         /* Panel body (response text) */
         .pb {
             padding: 8px 10px;
-            font-size: .72em;
+            font-size: .82em;
             line-height: 1.7;
             white-space: pre-wrap;
-            word-break: break-all;
-            color: #aaa;
+            overflow-wrap: anywhere;
+            color: var(--text-main);
             overflow-y: auto;
             max-height: 220px;
         }
         .pb:empty::before {
             content: '— STANDBY —';
-            color: #2a2a2a;
+            color: #6c5623;
         }
         .pb::-webkit-scrollbar { width: 3px; }
         .pb::-webkit-scrollbar-thumb { background: var(--amber-dim); }
@@ -243,9 +365,9 @@
         }
         .consensus.show { display: block; }
         .cs-label {
-            font-size: .58em;
-            letter-spacing: .3em;
-            color: var(--amber-dim);
+            font-size: .68em;
+            letter-spacing: .22em;
+            color: var(--amber-soft);
             margin-bottom: 12px;
         }
         .vote-row {
@@ -266,7 +388,7 @@
         .vote-circle.approve { color:#00ff66; border-color:#00ff66; box-shadow:0 0 10px #00ff66; }
         .vote-circle.reject  { color:#ff3300; border-color:#ff3300; box-shadow:0 0 10px #ff3300; }
         .vote-circle.pending { color:#333; border-color:#333; }
-        .vote-name { font-size: .56em; color: var(--amber-dim); }
+        .vote-name { font-size: .66em; color: var(--amber-soft); }
         .fv {
             font-size: 2em;
             font-weight: bold;
@@ -277,8 +399,8 @@
         .fv.reject  { color:#ff3300; text-shadow:0 0 18px #ff3300,0 0 40px rgba(255,51,0,.4); }
         .fv.pending { color: var(--amber); text-shadow: 0 0 14px var(--amber-glow); }
         .fd {
-            font-size: .6em;
-            color: var(--amber-dim);
+            font-size: .7em;
+            color: var(--amber-soft);
             letter-spacing: .12em;
             line-height: 1.8;
         }
@@ -296,14 +418,14 @@
             min-height: 110px;
         }
         .summary-label {
-            font-size: .56em;
-            color: var(--amber-dim);
-            letter-spacing: .22em;
+            font-size: .68em;
+            color: var(--amber-soft);
+            letter-spacing: .18em;
             margin-bottom: 8px;
         }
         .summary-text,
         .summary-list {
-            font-size: .74em;
+            font-size: .82em;
             line-height: 1.7;
             color: #c9b27a;
         }
@@ -337,14 +459,14 @@
             top: -8px; left: 10px;
             background: var(--bg);
             padding: 0 6px;
-            font-size: .55em;
-            color: var(--amber-dim);
+            font-size: .68em;
+            color: var(--amber-soft);
             letter-spacing: .15em;
         }
         .query-hint {
             margin: 0 10px 10px;
-            font-size: .64em;
-            color: #7d5a0d;
+            font-size: .76em;
+            color: var(--text-main);
             letter-spacing: .04em;
             line-height: 1.7;
         }
@@ -354,14 +476,30 @@
             border: none;
             color: var(--amber);
             font-family: inherit;
-            font-size: .85em;
+            font-size: .92em;
             padding: 12px 10px 8px;
             outline: none;
             resize: none;
-            min-height: 58px;
+            min-height: 82px;
             line-height: 1.5;
         }
-        textarea::placeholder { color: #3a2800; }
+        textarea::placeholder { color: #7b5d1a; }
+
+        .field-help,
+        .field-error {
+            margin: 0 10px 10px;
+            font-size: .74em;
+            line-height: 1.7;
+        }
+        .field-help { color: var(--amber-soft); }
+        .field-error {
+            color: #ff9f88;
+            display: none;
+        }
+        .field-error.show { display: block; }
+        .field-outline {
+            box-shadow: 0 0 0 1px var(--danger);
+        }
 
         /* ━━ CONTROLS ━━ */
         .controls {
@@ -376,9 +514,9 @@
             border: 2px solid var(--amber);
             color: var(--amber);
             font-family: inherit;
-            font-size: .85em;
+            font-size: .9em;
             font-weight: bold;
-            letter-spacing: .35em;
+            letter-spacing: .22em;
             cursor: pointer;
             transition: all .15s;
         }
@@ -392,18 +530,14 @@
         .btn.reset:hover { background: #cc3300; color: #000; box-shadow: 0 0 16px rgba(204,51,0,.5); }
 
         /* ━━ API KEY SECTION ━━ */
-        .api-section {
-            margin: 0 10px 16px;
-            border: 1px solid var(--amber-dim);
-        }
         .api-toggle {
             width: 100%;
             background: transparent;
             border: none;
             color: var(--amber-dim);
             font-family: inherit;
-            font-size: .65em;
-            padding: 8px 12px;
+            font-size: .74em;
+            padding: 10px 12px;
             text-align: left;
             cursor: pointer;
             letter-spacing: .15em;
@@ -416,9 +550,9 @@
         .api-body.open { display: block; }
 
         .api-steps {
-            font-size: .68em;
-            color: #666;
-            line-height: 2.1;
+            font-size: .76em;
+            color: var(--text-main);
+            line-height: 1.9;
             margin-bottom: 14px;
             padding: 10px;
             border: 1px solid #222;
@@ -443,22 +577,22 @@
             margin-bottom: 6px;
         }
         .api-entry-name {
-            font-size: .72em;
+            font-size: .8em;
             font-weight: bold;
             letter-spacing: .15em;
         }
         .api-entry-name.m { color: var(--grn-accent); }
         .api-entry-name.b { color: var(--blue-accent); }
         .api-entry-name.c { color: var(--red-accent); }
-        .api-entry-role { font-size: .6em; color: #555; }
-        .api-entry-model { font-size: .58em; color: #3a3a3a; margin-left: auto; letter-spacing: .03em; }
+        .api-entry-role { font-size: .7em; color: var(--text-main); }
+        .api-entry-model { font-size: .62em; color: #63522d; margin-left: auto; letter-spacing: .03em; }
 
         .api-row {
             display: flex;
             gap: 6px;
             align-items: center;
         }
-        .api-lbl { font-size: .65em; color: var(--amber-dim); white-space: nowrap; }
+        .api-lbl { font-size: .72em; color: var(--amber-soft); white-space: nowrap; }
         .api-inp {
             flex: 1;
             min-width: 120px;
@@ -466,24 +600,129 @@
             border: 1px solid var(--amber-dim);
             color: var(--amber);
             font-family: inherit;
-            font-size: .8em;
-            padding: 5px 8px;
+            font-size: .88em;
+            padding: 8px 10px;
             outline: none;
         }
         .api-inp:focus { border-color: var(--amber); }
-        .api-inp::placeholder { color: #2a1a00; }
-        .api-note { font-size: .6em; color: #3a2500; margin-top: 10px; }
+        .api-inp::placeholder { color: #7b5d1a; }
+        .api-note {
+            font-size: .74em;
+            color: var(--text-main);
+            margin-top: 10px;
+            line-height: 1.7;
+        }
+
+        .global-banner {
+            margin: 0 10px 10px;
+            border: 1px solid var(--amber-dim);
+            background: #090909;
+            padding: 12px;
+            display: none;
+            gap: 10px;
+            align-items: start;
+            justify-content: space-between;
+        }
+        .global-banner.show {
+            display: flex;
+        }
+        .global-banner.error { background: var(--danger-bg); border-color: var(--danger); }
+        .global-banner.warning { background: rgba(92, 52, 0, 0.3); }
+        .global-banner.info { background: var(--info-bg); border-color: #3a86ff; }
+        .global-banner.success { background: var(--ok-bg); border-color: #19c764; }
+        .banner-copy {
+            min-width: 0;
+            flex: 1;
+        }
+        .banner-title {
+            font-size: .82em;
+            font-weight: bold;
+            letter-spacing: .12em;
+            margin-bottom: 6px;
+            color: #fff1c8;
+        }
+        .banner-message {
+            font-size: .82em;
+            line-height: 1.75;
+            color: #f1ddaf;
+        }
+        .banner-hints {
+            list-style: none;
+            margin: 8px 0 0;
+            padding: 0;
+        }
+        .banner-hints li {
+            position: relative;
+            padding-left: 12px;
+            margin-bottom: 5px;
+            font-size: .76em;
+            color: #f1ddaf;
+            line-height: 1.7;
+        }
+        .banner-hints li:last-child { margin-bottom: 0; }
+        .banner-hints li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--amber);
+        }
+        .banner-action {
+            border: 1px solid currentColor;
+            background: transparent;
+            color: var(--amber);
+            font-family: inherit;
+            font-size: .74em;
+            letter-spacing: .12em;
+            padding: 9px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .banner-action[hidden] { display: none; }
 
         /* ━━ RESPONSIVE ━━ */
-        @media (max-width: 500px) {
-            .statusbar { font-size: .55em; }
-            .ph-name { font-size: .8em; letter-spacing: .15em; }
-            .panel-b  { min-height: 150px; }
-            .panel-c, .panel-m { min-height: 200px; }
-            .pb { font-size: .68em; }
-            .fv { font-size: 1.6em; }
-            .title-motion { font-size: .88em; }
+        @media (max-width: 720px) {
+            .quickstart-steps,
+            .mode-grid,
             .consensus-grid { grid-template-columns: 1fr; }
+            .global-banner.show { display: grid; }
+        }
+
+        @media (max-width: 640px) {
+            .statusbar {
+                font-size: .6em;
+                gap: 6px;
+                padding: 4px 8px;
+            }
+            .title-motion {
+                font-size: .96em;
+                letter-spacing: .08em;
+            }
+            .ph-name { font-size: .82em; letter-spacing: .15em; }
+            .panels-wrap {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 26px auto auto;
+            }
+            .panel-b,
+            .panel-c,
+            .panel-m,
+            .magi-strip {
+                grid-column: 1;
+            }
+            .panel-b { grid-row: 1; min-height: 170px; }
+            .magi-strip { grid-row: 2; }
+            .panel-c { grid-row: 3; min-height: 190px; }
+            .panel-m { grid-row: 4; min-height: 190px; }
+            .pb { font-size: .76em; max-height: 200px; }
+            .fv {
+                font-size: 1.5em;
+                letter-spacing: .2em;
+            }
+            .api-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .api-lbl { margin-bottom: 4px; }
+            .controls { flex-direction: column; }
         }
     </style>
 </head>
@@ -502,6 +741,104 @@
     <div class="title-motion" id="motionDisplay">— AWAIT CONFLICT QUERY —</div>
 </div>
 
+<div class="quickstart">
+    <div class="quickstart-label">HOW TO PLAY</div>
+    <div class="quickstart-steps">
+        <div class="step-card">
+            <span class="step-index">STEP 1</span>
+            <div class="step-text">まずは `DEMO` で無料体験。実AIで回すときだけ `GEMINI` を選びます。</div>
+        </div>
+        <div class="step-card">
+            <span class="step-index">STEP 2</span>
+            <div class="step-text">利害がぶつかる問いを入力します。小規模導入、監視、採用、炎上案件が割れやすいです。</div>
+        </div>
+        <div class="step-card">
+            <span class="step-index">STEP 3</span>
+            <div class="step-text">`START` で3人格を順に開示。最後に多数派、少数意見、保留条件を読みます。</div>
+        </div>
+    </div>
+</div>
+
+<div class="setup-wrap">
+    <div class="mode-section">
+        <div class="section-heading">RUN MODE</div>
+        <div class="section-note" id="modeDescription">無料で遊ぶなら `DEMO`。本物の Gemini 審議を使うときだけ API キーを設定します。</div>
+        <div class="mode-grid">
+            <label class="mode-card">
+                <input type="radio" name="runMode" value="demo" checked />
+                <span class="mode-card-body">
+                    <span class="mode-card-title">DEMO</span>
+                    <span class="mode-card-meta">無料 / キー不要</span>
+                    <span class="mode-card-copy">ブラウザ内の疑似審議で遊べます。初回導入や回線不調時のフォールバック向けです。</span>
+                </span>
+            </label>
+            <label class="mode-card">
+                <input type="radio" name="runMode" value="gemini" />
+                <span class="mode-card-body">
+                    <span class="mode-card-title">GEMINI</span>
+                    <span class="mode-card-meta">実AI / APIキー必要</span>
+                    <span class="mode-card-copy">Gemini API に1回だけ問い合わせて、3人格の審議をまとめて返します。</span>
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <!-- API key section (collapsible) -->
+    <div class="api-section" id="apiSection">
+        <button class="api-toggle" type="button" onclick="toggleApi()">
+            <span>▶ API KEY 設定</span>
+            <span id="apiIcon">∨</span>
+        </button>
+        <div class="api-body" id="apiBody">
+
+            <div class="api-steps">
+                <strong style="color:var(--amber)">【APIキー取得】</strong><br>
+                <a href="https://aistudio.google.com" target="_blank" rel="noreferrer">aistudio.google.com</a>
+                → 「Get API key」— Googleアカウントのみ・カード不要・無料枠あり
+            </div>
+
+            <div class="api-entry">
+                <div class="api-entry-header">
+                    <span class="api-entry-name m">GEMINI API KEY</span>
+                    <span class="api-entry-role">3人格+合議を1回で生成 / 実AIモード用</span>
+                </div>
+                <div class="api-row">
+                    <span class="api-lbl">API KEY ▶</span>
+                    <input type="password" id="keyGemini" class="api-inp" placeholder="AIza..." />
+                </div>
+                <div class="field-error" id="keyGeminiError"></div>
+            </div>
+
+            <div class="api-note" id="apiModeNote">`DEMO` モードでは不要です。`GEMINI` を選んだときだけ使います。キーはブラウザ内のみで処理し、他サーバーへは転送しません。</div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Query -->
+<div class="query-wrap" id="queryWrap">
+    <textarea id="queryInput" rows="2"
+        placeholder="MAGIへの問いを入力...&#10;例:「生成AIで採用一次面接を自動化すべきか」「従業員監視AIを導入すべきか」"></textarea>
+</div>
+<div class="query-hint">革新、被害、運用が衝突する問いほど割れが読みやすくなります。例: 採用自動化、監視AI、匿名相談の公開、炎上対策の自動化。</div>
+<div class="field-help">`Ctrl + Enter` でも START できます。</div>
+<div class="field-error" id="queryInputError"></div>
+
+<!-- Controls -->
+<div class="controls">
+    <button class="btn" id="startBtn" onclick="execute()">▶ START</button>
+    <button class="btn reset" onclick="resetAll()">■ RESET</button>
+</div>
+
+<div class="global-banner" id="globalBanner">
+    <div class="banner-copy">
+        <div class="banner-title" id="bannerTitle"></div>
+        <div class="banner-message" id="bannerMessage"></div>
+        <ul class="banner-hints" id="bannerHints"></ul>
+    </div>
+    <button class="banner-action" id="bannerAction" type="button" hidden></button>
+</div>
+
 <!-- Panels -->
 <div class="panels-wrap">
 
@@ -512,7 +849,7 @@
             <span class="ph-name">BALTHASAR-2</span>
             <span class="ph-id">ID:002-β</span>
         </div>
-        <div class="ph-role">// Gemini [異端審問官] — 前提破壊・逆張り・空気を疑う</div>
+        <div class="ph-role" id="role-b">// 前提破壊・逆張り・空気を疑う</div>
         <div class="pb" id="body-b"></div>
         <div class="pf">
             <span class="vt" id="vt-b">[ STANDBY ]</span>
@@ -530,7 +867,7 @@
             <span class="ph-name">CASPAR-3</span>
             <span class="ph-id">ID:003-γ</span>
         </div>
-        <div class="ph-role">// Gemini [被害監査官] — 権利侵害・炎上・悪用を止める</div>
+        <div class="ph-role" id="role-c">// 権利侵害・炎上・悪用を止める</div>
         <div class="pb" id="body-c"></div>
         <div class="pf">
             <span class="vt" id="vt-c">[ STANDBY ]</span>
@@ -545,7 +882,7 @@
             <span class="ph-name">MELCHIOR-1</span>
             <span class="ph-id">ID:001-α</span>
         </div>
-        <div class="ph-role">// Gemini [執行責任者] — 実装・運用・撤退計画を問う</div>
+        <div class="ph-role" id="role-m">// 実装・運用・撤退計画を問う</div>
         <div class="pb" id="body-m"></div>
         <div class="pf">
             <span class="vt" id="vt-m">[ STANDBY ]</span>
@@ -581,49 +918,6 @@
     </div>
 </div>
 
-<!-- Query -->
-<div class="query-wrap">
-    <textarea id="queryInput" rows="2"
-        placeholder="MAGIへの問いを入力...&#10;例:「生成AIで採用一次面接を自動化すべきか」「従業員監視AIを導入すべきか」"></textarea>
-</div>
-<div class="query-hint">1回の審議で3人格と合議をまとめて生成します。革新、被害、運用が衝突する問いほど、ローカル開示でも割れが読みやすくなります。</div>
-
-<!-- Controls -->
-<div class="controls">
-    <button class="btn" id="startBtn" onclick="execute()">▶ START</button>
-    <button class="btn reset" onclick="resetAll()">■ RESET</button>
-</div>
-
-<!-- API key section (collapsible) -->
-<div class="api-section">
-    <button class="api-toggle" onclick="toggleApi(this)">
-        <span>▶ API KEY 設定（クリックで展開）</span>
-        <span id="apiIcon">∨</span>
-    </button>
-    <div class="api-body" id="apiBody">
-
-        <div class="api-steps">
-            <strong style="color:var(--amber)">【APIキー取得】</strong><br>
-            <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
-            → 「Get API key」— Googleアカウントのみ・カード不要・無料枠あり
-        </div>
-
-        <div class="api-entry">
-            <div class="api-entry-header">
-                <span class="api-entry-name m">GEMINI API KEY</span>
-                <span class="api-entry-role">3人格+合議を1回で生成 / gemini-2.5-flash</span>
-            </div>
-            <div class="api-row">
-                <span class="api-lbl">API KEY ▶</span>
-                <input type="password" id="keyGemini" class="api-inp" placeholder="AIza..." />
-            </div>
-        </div>
-
-        <div class="api-note">* 1回の Gemini リクエストで 3 パネル分の審議と合議を取得します。キーはブラウザ内のみで処理され、他サーバーへの転送はありません。</div>
-
-    </div>
-</div>
-
 <script>
 function tick() {
     document.getElementById('clock').textContent =
@@ -632,10 +926,13 @@ function tick() {
 tick();
 setInterval(tick, 1000);
 
-function toggleApi() {
+function toggleApi(forceOpen = null) {
     const body = document.getElementById('apiBody');
     const icon = document.getElementById('apiIcon');
-    const open = body.classList.toggle('open');
+    const open = typeof forceOpen === 'boolean'
+        ? forceOpen
+        : !body.classList.contains('open');
+    body.classList.toggle('open', open);
     icon.textContent = open ? '∧' : '∨';
 }
 
@@ -643,10 +940,33 @@ function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const DEFAULT_MOTION = '— AWAIT CONFLICT QUERY —';
 const PANEL_REVEAL_DELAY = 260;
 const CONSENSUS_REVEAL_DELAY = 220;
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const LATENT_MINORITY_TEXT = '満場一致だが潜在的な反対論点は残る。';
+const RUN_MODE_META = {
+    demo: {
+        label: 'DEMO',
+        description: '無料で遊ぶなら DEMO。ブラウザ内の疑似審議で、まず割れ方と流れを確認できます。',
+        apiNote: 'DEMO モードでは API キー不要です。GEMINI を選んだときだけ下のキーを使います。',
+        pendingStatus: 'LOCAL SIMULATION',
+        pendingBody: '[ LOCAL SIMULATION ]\n> seeded deliberation prepared\n> local reveal queue active',
+        resultSuffix: 'DEMO MODE / LOCAL REVEAL'
+    },
+    gemini: {
+        label: 'GEMINI',
+        description: 'GEMINI は実AIモードです。1回の API 呼び出しで3人格の審議をまとめて生成します。',
+        apiNote: 'GEMINI モードでは API キーが必要です。キーはブラウザ内のみで処理し、他サーバーへは転送しません。',
+        pendingStatus: 'REMOTE DELIBERATION',
+        pendingBody: '[ INTERNAL DELIBERATION ]\n> one Gemini request armed\n> local reveal queue active',
+        resultSuffix: 'SINGLE REQUEST / LOCAL REVEAL'
+    }
+};
+const FIELD_UI = {
+    queryInput: { errorId: 'queryInputError', targetId: 'queryWrap' },
+    keyGemini: { errorId: 'keyGeminiError', targetId: 'apiSection' }
+};
 const PANEL_RESPONSE_SCHEMA = {
     type: 'object',
     properties: {
@@ -691,6 +1011,7 @@ const MAGI = [
         key: 'b',
         name: 'BALTHASAR-2',
         badge: '異端審問官',
+        role: '前提破壊・逆張り・空気を疑う',
         identity: '常識、権威、空気、綺麗事に最初に疑いを向ける前提破壊担当です。',
         rules: [
             '既存の常識をなぞるだけの提案、言い換えだけの改善、楽観前提の企画には強く否決寄りになること。',
@@ -702,6 +1023,7 @@ const MAGI = [
         key: 'c',
         name: 'CASPAR-3',
         badge: '被害監査官',
+        role: '権利侵害・炎上・悪用を止める',
         identity: '弱い立場の人、見えにくい被害者、炎上、悪用、権利侵害を止める防衛担当です。',
         rules: [
             '誰が傷つくか、誰が排除されるか、誰が監視されるかを最優先で評価すること。',
@@ -713,6 +1035,7 @@ const MAGI = [
         key: 'm',
         name: 'MELCHIOR-1',
         badge: '執行責任者',
+        role: '実装・運用・撤退計画を問う',
         identity: '実装、コスト、責任者、運用負荷、撤退計画まで背負う現場責任者です。',
         rules: [
             '担当者、計測方法、運用フロー、失敗時の撤退条件が見えない案は否決寄りにすること。',
@@ -727,9 +1050,183 @@ const PANEL_META = Object.fromEntries(MAGI.map(panel => [panel.key, panel]));
 const PANEL_LABELS = { b: 'BALTHASAR', c: 'CASPAR', m: 'MELCHIOR' };
 const verdicts = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const panelStates = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
+const DEMO_SIGNAL_RULES = {
+    b: {
+        positive: ['試験', '限定', '段階', '小規模', '検証', '撤退', '仮説', '実験', 'poc', '比較'],
+        negative: ['ai', '生成ai', '自動化', '効率化', '最適化', '監視', '全面', '全社', '置き換え', '炎上']
+    },
+    c: {
+        positive: ['同意', '匿名', '監査', '説明', '救済', '記録', '保護', '人手確認', '相談窓口', 'オプトアウト'],
+        negative: ['監視', '顔認証', '採用', '評価', '解雇', '医療', '個人情報', '位置情報', '未成年', '子ども', '差別', '炎上']
+    },
+    m: {
+        positive: ['試験', '限定', '段階', '担当', '責任者', 'kpi', '検証', '予算', '撤退', 'ログ', '運用'],
+        negative: ['全面', '全社', '自動化', '即時', '即日', '置き換え', '本番', '24時間', '無人', '完全', '常設']
+    }
+};
+const DEMO_LIBRARY = {
+    b: {
+        approve: [
+            { conclusion: '小さく試す価値', reason: '常識を崩す余地がある', risk: '演出先行で空転する', condition: '失敗時に即撤退' },
+            { conclusion: '前提検証なら可', reason: '惰性判断を揺らせる', risk: '流行語で誤魔化す', condition: '比較対象を残す' },
+            { conclusion: '限定公開で可', reason: '反対論点を炙れる', risk: '期待だけ先行する', condition: '数字で見切る' }
+        ],
+        reject: [
+            { conclusion: '流行語先行で危険', reason: '便利さで思考停止する', risk: '元に戻せず常態化', condition: '対象と期間を限定' },
+            { conclusion: '空気に流されすぎ', reason: '誰が得するか曖昧', risk: '失敗しても止まらない', condition: '撤退条件を先に置く' },
+            { conclusion: '逆張りでも否決', reason: '新規性より惰性が強い', risk: '看板だけ残って腐る', condition: '本当に変える一点を絞る' }
+        ]
+    },
+    c: {
+        approve: [
+            { conclusion: '保護策次第で可', reason: '被害を減らす余地がある', risk: '弱い側に説明負荷', condition: '救済線を先に置く' },
+            { conclusion: '限定条件で可', reason: '被害監視を先置きできる', risk: '想定外の悪用が出る', condition: '人手確認を残す' },
+            { conclusion: '監査付きなら可', reason: '抑止策を組み込める', risk: '同意が形骸化する', condition: '拒否導線を明示' }
+        ],
+        reject: [
+            { conclusion: '被害の火種が大きい', reason: '弱い側へ負荷が寄る', risk: '差別や炎上を増幅', condition: '救済策を先に設計' },
+            { conclusion: '説明責任に耐えない', reason: '本人不在で進みやすい', risk: '権利侵害が固定化', condition: '同意と監査を明文化' },
+            { conclusion: '守りが薄すぎる', reason: '悪用時の歯止めが弱い', risk: '見えない被害が蓄積', condition: '例外対応を先に置く' }
+        ]
+    },
+    m: {
+        approve: [
+            { conclusion: '段階導入なら可', reason: '運用を切り分けられる', risk: '責任分界が曖昧', condition: '担当者と停止条件を固定' },
+            { conclusion: '試験運用で可', reason: '現場負荷を測りやすい', risk: 'KPI不在で長引く', condition: '計測項目を先に決める' },
+            { conclusion: '小規模検証なら可', reason: '撤退線を引きやすい', risk: '保守運用が膨らむ', condition: 'ログと監査を残す' }
+        ],
+        reject: [
+            { conclusion: '運用責任が重すぎる', reason: '現場にしわ寄せが出る', risk: '止め時を失う', condition: 'KPIと撤退線を置く' },
+            { conclusion: '本番投入は早い', reason: '担当者が見えない', risk: '障害時の責任が散る', condition: '責任者を固定する' },
+            { conclusion: '段取り不足で否決', reason: '維持コストを甘く見ている', risk: '運用が属人化する', condition: '手順と監査を先に作る' }
+        ]
+    }
+};
 
 let activeRunId = 0;
 let activeController = null;
+let bannerActionType = null;
+
+function getSelectedMode() {
+    return document.querySelector('input[name="runMode"]:checked')?.value || 'demo';
+}
+
+function hashText(text) {
+    let hash = 2166136261;
+    const source = String(text || '');
+    for (let i = 0; i < source.length; i += 1) {
+        hash ^= source.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+}
+
+function pickSeeded(items, seed) {
+    return items[hashText(seed) % items.length];
+}
+
+function keywordHits(text, words) {
+    return words.reduce((count, word) => count + (text.includes(word) ? 1 : 0), 0);
+}
+
+function syncModeUi() {
+    const mode = getSelectedMode();
+    const meta = RUN_MODE_META[mode];
+    document.getElementById('modeDescription').textContent = meta.description;
+    document.getElementById('apiModeNote').textContent = meta.apiNote;
+    document.getElementById('startBtn').textContent = mode === 'demo' ? '▶ START DEMO' : '▶ START GEMINI';
+    if (mode === 'gemini') {
+        toggleApi(true);
+    }
+}
+
+function setInteractiveState(isBusy) {
+    document.getElementById('startBtn').disabled = isBusy;
+    document.getElementById('queryInput').disabled = isBusy;
+    document.getElementById('keyGemini').disabled = isBusy;
+    document.querySelectorAll('input[name="runMode"]').forEach(input => {
+        input.disabled = isBusy;
+    });
+    if (isBusy) {
+        document.getElementById('startBtn').textContent = getSelectedMode() === 'demo'
+            ? '▶ PROCESSING DEMO...'
+            : '▶ PROCESSING GEMINI...';
+        return;
+    }
+    syncModeUi();
+}
+
+function setFieldError(fieldId, message) {
+    const ui = FIELD_UI[fieldId];
+    if (!ui) return;
+    document.getElementById(ui.errorId).textContent = message;
+    document.getElementById(ui.errorId).classList.add('show');
+    document.getElementById(ui.targetId).classList.add('field-outline');
+}
+
+function clearFieldError(fieldId) {
+    const ui = FIELD_UI[fieldId];
+    if (!ui) return;
+    document.getElementById(ui.errorId).textContent = '';
+    document.getElementById(ui.errorId).classList.remove('show');
+    document.getElementById(ui.targetId).classList.remove('field-outline');
+}
+
+function clearFieldErrors() {
+    Object.keys(FIELD_UI).forEach(clearFieldError);
+}
+
+function clearBanner() {
+    const banner = document.getElementById('globalBanner');
+    banner.className = 'global-banner';
+    document.getElementById('bannerTitle').textContent = '';
+    document.getElementById('bannerMessage').textContent = '';
+    document.getElementById('bannerHints').replaceChildren();
+    const actionBtn = document.getElementById('bannerAction');
+    actionBtn.hidden = true;
+    actionBtn.textContent = '';
+    bannerActionType = null;
+}
+
+function showBanner(info) {
+    clearBanner();
+    if (!info) return;
+    const banner = document.getElementById('globalBanner');
+    banner.classList.add('show', info.variant || 'info');
+    document.getElementById('bannerTitle').textContent = info.title || '';
+    document.getElementById('bannerMessage').textContent = info.message || '';
+    renderList(document.getElementById('bannerHints'), info.hints || [], '');
+    if (info.actionType && info.actionLabel) {
+        bannerActionType = info.actionType;
+        const actionBtn = document.getElementById('bannerAction');
+        actionBtn.hidden = false;
+        actionBtn.textContent = info.actionLabel;
+    }
+}
+
+function handleBannerAction(actionType) {
+    if (!actionType) return;
+    if (actionType === 'open-api') {
+        toggleApi(true);
+        document.getElementById('keyGemini').focus();
+        return;
+    }
+    if (actionType === 'focus-query') {
+        document.getElementById('queryInput').focus();
+        return;
+    }
+    if (actionType === 'switch-demo') {
+        document.querySelector('input[name="runMode"][value="demo"]').checked = true;
+        clearFieldErrors();
+        clearBanner();
+        syncModeUi();
+        document.getElementById('queryInput').focus();
+        return;
+    }
+    if (actionType === 'retry') {
+        execute();
+    }
+}
 
 function buildSingleMagiPrompt() {
     const lines = [
@@ -817,12 +1314,12 @@ function createStructuredError(code, message, status) {
 
 function buildFormatErrorMessage(detail) {
     if (/panel missing/i.test(detail)) {
-        return '審議レスポンスの一部が欠けています。もう一度実行してください。';
+        return '3人格のうち一部が欠けています。Gemini の返答が途中で崩れた可能性があります。';
     }
     if (/JSON parse failed|payload truncated|unexpected end|unterminated/i.test(detail)) {
-        return '構造化レスポンスが途中で切れたか、JSON が崩れました。もう一度実行してください。';
+        return 'Gemini の返答が途中で切れたか、JSON 形式が崩れています。';
     }
-    return '構造化レスポンスの解析に失敗しました。もう一度実行してください。';
+    return 'Gemini の返答を MAGI の構造に復元できませんでした。';
 }
 
 function attachStructuredContext(error, context) {
@@ -859,7 +1356,7 @@ function extractJsonPayload(text) {
         throw createStructuredError('FORMAT_ERROR', 'JSON payload not found');
     }
     if (end === -1 || end < start) {
-        throw createStructuredError('FORMAT_ERROR', 'JSON payload truncated');
+        throw createStructuredError('TRUNCATED', 'JSON payload truncated');
     }
 
     try {
@@ -930,7 +1427,7 @@ function formatPanelResponse(panel) {
 
 function renderList(listEl, items, emptyMessage) {
     listEl.replaceChildren();
-    const values = items.length ? items : [emptyMessage];
+    const values = items.length ? items : (emptyMessage ? [emptyMessage] : []);
     values.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item;
@@ -1045,6 +1542,35 @@ function getOutcomeState(approveCount, rejectCount, resolvedCount) {
     };
 }
 
+function buildConsensusFromPanels(panels, overrides = {}) {
+    const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
+    const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
+    const resolvedCount = approveCount + rejectCount;
+    const outcome = getOutcomeState(approveCount, rejectCount, resolvedCount);
+    const majorityKeys = outcome.majorityVerdict
+        ? PANEL_KEYS.filter(key => panels[key].verdict === outcome.majorityVerdict)
+        : [];
+    const minorityKeys = outcome.majorityVerdict
+        ? PANEL_KEYS.filter(key => panels[key].verdict && panels[key].verdict !== outcome.majorityVerdict)
+        : [];
+    const holdConditions = sanitizeArray(getSourceValue(overrides, ['hold_conditions', 'holdConditions', 'conditions', '保留条件'])).slice(0, 4);
+    const effectiveHoldConditions = holdConditions.length
+        ? holdConditions
+        : collectHoldConditions(outcome.majorityVerdict, panels);
+
+    return {
+        outcome,
+        voteSummary: cleanLine(getSourceValue(overrides, ['vote_summary', 'voteSummary'])) || `${approveCount} approve / ${rejectCount} reject`,
+        majorityView: cleanLine(getSourceValue(overrides, ['majority_view', 'majorityView', '多数派']))
+            || (majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。'),
+        minorityView: cleanLine(getSourceValue(overrides, ['minority_view', 'minorityView', '少数意見']))
+            || (minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels)),
+        holdConditions: effectiveHoldConditions,
+        recommendedAction: cleanLine(getSourceValue(overrides, ['recommended_action', 'recommendedAction', '推奨アクション']))
+            || buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
+    };
+}
+
 function buildValidatedDeliberation(rawText, responseMeta = null) {
     let payload;
     try {
@@ -1079,38 +1605,65 @@ function buildValidatedDeliberation(rawText, responseMeta = null) {
         });
     }
 
-    const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
-    const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
-    const resolvedCount = approveCount + rejectCount;
-    const outcome = getOutcomeState(approveCount, rejectCount, resolvedCount);
-    const majorityKeys = outcome.majorityVerdict
-        ? PANEL_KEYS.filter(key => panels[key].verdict === outcome.majorityVerdict)
-        : [];
-    const minorityKeys = outcome.majorityVerdict
-        ? PANEL_KEYS.filter(key => panels[key].verdict && panels[key].verdict !== outcome.majorityVerdict)
-        : [];
-
     const rawConsensus = payload.consensus && typeof payload.consensus === 'object'
         ? payload.consensus
         : payload;
-    const holdConditions = sanitizeArray(getSourceValue(rawConsensus, ['hold_conditions', 'conditions', '保留条件'])).slice(0, 4);
-    const effectiveHoldConditions = holdConditions.length
-        ? holdConditions
-        : collectHoldConditions(outcome.majorityVerdict, panels);
 
     return {
         panels,
-        consensus: {
-            outcome,
-            voteSummary: cleanLine(getSourceValue(rawConsensus, ['vote_summary', 'voteSummary'])) || `${approveCount} approve / ${rejectCount} reject`,
-            majorityView: cleanLine(getSourceValue(rawConsensus, ['majority_view', 'majorityView', '多数派']))
-                || (majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。'),
-            minorityView: cleanLine(getSourceValue(rawConsensus, ['minority_view', 'minorityView', '少数意見']))
-                || (minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels)),
-            holdConditions: effectiveHoldConditions,
-            recommendedAction: cleanLine(getSourceValue(rawConsensus, ['recommended_action', 'recommendedAction', '推奨アクション']))
-                || buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
-        }
+        consensus: buildConsensusFromPanels(panels, rawConsensus)
+    };
+}
+
+function scoreDemoPanel(query, key) {
+    const normalized = cleanLine(query).toLowerCase();
+    const drift = ((hashText(`${normalized}:${key}`) % 100) / 100) - 0.5;
+    const rules = DEMO_SIGNAL_RULES[key];
+    return (keywordHits(normalized, rules.positive) * 0.95)
+        - (keywordHits(normalized, rules.negative) * 1.05)
+        + (drift * 0.9);
+}
+
+function createDemoPanel(query, meta, verdict) {
+    const template = pickSeeded(DEMO_LIBRARY[meta.key][verdict], `${query}:${meta.key}:${verdict}`);
+    return {
+        name: meta.name,
+        badge: meta.badge,
+        conclusion: template.conclusion,
+        reasons: [template.reason],
+        risk: template.risk,
+        conditions: template.condition ? [template.condition] : [],
+        verdict
+    };
+}
+
+function rebalanceDemoPanels(query, panels, scores) {
+    const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
+    const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
+    if (approveCount && rejectCount) return;
+
+    const candidate = Object.entries(scores)
+        .sort((left, right) => Math.abs(left[1]) - Math.abs(right[1]))[0];
+    if (!candidate || Math.abs(candidate[1]) >= 1.3) return;
+
+    const [key] = candidate;
+    const meta = PANEL_META[key];
+    const flippedVerdict = panels[key].verdict === 'approve' ? 'reject' : 'approve';
+    panels[key] = createDemoPanel(query, meta, flippedVerdict);
+}
+
+function buildDemoDeliberation(query) {
+    const scores = Object.fromEntries(MAGI.map(meta => [meta.key, scoreDemoPanel(query, meta.key)]));
+    const panels = Object.fromEntries(MAGI.map(meta => {
+        const verdict = scores[meta.key] >= 0 ? 'approve' : 'reject';
+        return [meta.key, createDemoPanel(query, meta, verdict)];
+    }));
+    rebalanceDemoPanels(query, panels, scores);
+    return {
+        panels,
+        consensus: buildConsensusFromPanels(panels, {
+            voteSummary: `DEMO ${PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length} approve / ${PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length} reject`
+        })
     };
 }
 
@@ -1163,60 +1716,113 @@ async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
 }
 
 function classifyError(error) {
-    const message = error?.message || '';
+    const message = String(error?.message || '');
+    const lowered = message.toLowerCase();
 
     if (error?.code === 'TRUNCATED' || error?.finishReason === 'MAX_TOKENS') {
         return {
-            code: 'RESPONSE TOO LONG',
-            message: 'Gemini の応答が途中で切れました。少し短い問いで再試行してください。'
+            variant: 'warning',
+            title: 'AI の返答が途中で切れました',
+            message: 'Gemini の返答が長すぎるか、途中で切断されました。',
+            hints: ['問いを少し短くする', '一度 RESET して再試行する', 'すぐ試すだけなら DEMO に切り替える'],
+            actionType: 'retry',
+            actionLabel: 'もう一度実行',
+            panelStatus: 'TRUNCATED'
         };
     }
 
     if (error?.code === 'FORMAT_ERROR') {
         return {
-            code: 'FORMAT ERROR',
-            message: buildFormatErrorMessage(error?.message || '')
+            variant: 'warning',
+            title: 'AI の返答形式が崩れました',
+            message: buildFormatErrorMessage(message),
+            hints: ['Gemini が panels JSON を返せなかった可能性があります', '問いを少し短くして再試行してください'],
+            actionType: 'retry',
+            actionLabel: 'もう一度実行',
+            panelStatus: 'FORMAT'
         };
     }
 
     if (error?.code === 'EMPTY') {
         return {
-            code: 'NO RESPONSE',
-            message: 'Gemini から審議本文を受信できませんでした。少し待って再試行してください。'
+            variant: 'warning',
+            title: 'Gemini から本文を受信できませんでした',
+            message: '空の応答を受け取ったため、審議を表示できませんでした。',
+            hints: ['少し待ってから再試行してください', '継続して失敗するなら DEMO モードへ切り替えてください'],
+            actionType: 'retry',
+            actionLabel: 'もう一度実行',
+            panelStatus: 'EMPTY'
         };
     }
 
-    if (error?.code === 'SAFETY' || /safety|blocked|prohibited/i.test(message)) {
+    if (error?.code === 'SAFETY' || /safety|blocked|prohibited/i.test(lowered)) {
         return {
-            code: 'SAFETY BLOCK',
-            message: '安全フィルターにより審議が返りませんでした。問いを言い換えてください。'
+            variant: 'warning',
+            title: '安全フィルターで停止しました',
+            message: '違法行為の手順や個人攻撃に近い表現を避け、是非やリスク評価として聞き直してください。',
+            hints: ['固有名詞や過激な手順語を減らす', '「どう実行するか」ではなく「導入すべきか」を問う', '監視・採用・医療は条件付きの聞き方にする'],
+            actionType: 'focus-query',
+            actionLabel: '問いを書き直す',
+            panelStatus: 'SAFETY'
         };
     }
 
-    if (error?.status === 429 || /429|quota|rate|resource exhausted/i.test(message)) {
+    if (error?.status === 429 || /429|resource exhausted|quota|rate/i.test(lowered)) {
+        if (/per day|rpd|daily|quota|free tier/i.test(lowered)) {
+            return {
+                variant: 'warning',
+                title: '無料枠または日次上限に到達しました',
+                message: '少し待つだけでは戻らない可能性があります。プロジェクト単位の上限に達したかもしれません。',
+                hints: ['Google AI Studio 側の使用量を確認する', '今日は DEMO モードで遊ぶ', '後でもう一度試す'],
+                actionType: 'switch-demo',
+                actionLabel: 'DEMO に切替',
+                panelStatus: 'QUOTA'
+            };
+        }
+
         return {
-            code: 'RATE LIMITED',
-            message: '短時間に審議しすぎました。少し待ってから再試行してください。'
+            variant: 'warning',
+            title: '短時間に審議しすぎました',
+            message: '瞬間的なレート上限に当たった可能性があります。',
+            hints: ['少し待ってから再試行してください', '連続実行を少し空けると戻ることがあります'],
+            actionType: 'retry',
+            actionLabel: 'もう一度実行',
+            panelStatus: 'RATE'
         };
     }
 
-    if ([401, 403].includes(error?.status) || /api key|credential|permission|auth/i.test(message)) {
+    if ([401, 403].includes(error?.status) || /api key|credential|permission|auth/i.test(lowered)) {
         return {
-            code: 'AUTH ERROR',
-            message: 'APIキーが無効か権限が不足しています。Google AI Studio のキーを確認してください。'
+            variant: 'error',
+            title: 'API キーを確認してください',
+            message: 'API キーが無効か、Generative Language API を使う権限が不足しています。',
+            hints: ['Google AI Studio でキーを再作成する', 'キーを貼り直して再試行する', '急ぎなら DEMO モードを使う'],
+            actionType: 'open-api',
+            actionLabel: 'API 設定を開く',
+            panelStatus: 'AUTH'
         };
     }
 
-    if (error?.status === 400 || /invalid argument|bad request|schema/i.test(message)) {
+    if (error?.status === 400 || /invalid argument|bad request|schema/i.test(lowered)) {
         return {
-            code: 'REQUEST ERROR',
-            message: 'Gemini が審議リクエストを受け付けませんでした。入力内容か応答形式を見直して再試行してください。'
+            variant: 'warning',
+            title: 'Gemini が審議リクエストを受け付けませんでした',
+            message: '入力内容か、返答形式の指定が噛み合っていない可能性があります。',
+            hints: ['問いを短く整理する', '特殊記号を減らす', '継続する場合は DEMO で割れ方を先に確認する'],
+            actionType: 'focus-query',
+            actionLabel: '問いを見直す',
+            panelStatus: 'REQUEST'
         };
     }
 
     return {
-        code: 'REQUEST ERROR',
-        message: 'Gemini から審議を取得できませんでした。ネットワークまたは一時的な障害の可能性があります。'
+        variant: 'error',
+        title: 'Gemini に接続できませんでした',
+        message: 'ネットワーク障害か一時的な API 側の不調の可能性があります。',
+        hints: ['通信状態を確認する', '少し待ってから再試行する', 'すぐ遊ぶだけなら DEMO に切り替える'],
+        actionType: 'retry',
+        actionLabel: 'もう一度実行',
+        panelStatus: 'NETWORK'
     };
 }
 
@@ -1241,13 +1847,14 @@ function clearConsensus() {
     document.getElementById('finalDesc').textContent = '';
 }
 
-function setPanelPending(key, statusText = 'INTERNAL DELIBERATION') {
+function setPanelPending(key, mode) {
     const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
-    bodyEl.textContent = '[ INTERNAL DELIBERATION ]\n> one Gemini request armed\n> local reveal queue active';
+    const meta = RUN_MODE_META[mode];
+    bodyEl.textContent = meta.pendingBody;
     bodyEl.scrollTop = 0;
     vtEl.textContent = '[ -- ]';
     vtEl.className = 'vt';
-    stEl.textContent = statusText;
+    stEl.textContent = meta.pendingStatus;
     swEl.classList.add('on');
     verdicts[key] = null;
     panelStates[key] = null;
@@ -1270,20 +1877,21 @@ function renderPanel(key, panel) {
 }
 
 function renderGlobalError(info) {
+    showBanner(info);
     clearConsensus();
     PANEL_KEYS.forEach(key => {
         const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
-        bodyEl.textContent = `[${info.code}]\n${info.message}`;
-        vtEl.textContent = '[ ERR ]';
+        bodyEl.textContent = '[ DELIBERATION INTERRUPTED ]\n上部のエラーバナーを確認してください。';
+        vtEl.textContent = '[ STOP ]';
         vtEl.className = 'vt';
-        stEl.textContent = info.code;
+        stEl.textContent = info.panelStatus || 'INTERRUPTED';
         swEl.classList.remove('on');
         verdicts[key] = null;
         panelStates[key] = null;
     });
 }
 
-function showConsensus(consensus) {
+function showConsensus(consensus, mode) {
     const voteRow = document.getElementById('voteRow');
     const majoritySummaryEl = document.getElementById('majoritySummary');
     const minoritySummaryEl = document.getElementById('minoritySummary');
@@ -1309,7 +1917,7 @@ function showConsensus(consensus) {
 
     fv.textContent = outcome.finalText;
     fv.className = outcome.finalClass;
-    fd.textContent = `${consensus?.voteSummary || outcome.desc} // SINGLE REQUEST / LOCAL REVEAL`;
+    fd.textContent = `${consensus?.voteSummary || outcome.desc} // ${RUN_MODE_META[mode].resultSuffix}`;
     majoritySummaryEl.textContent = consensus?.majorityView || '多数派の要約を作れませんでした。';
     minoritySummaryEl.textContent = consensus?.minorityView || LATENT_MINORITY_TEXT;
     renderList(holdConditionsEl, consensus?.holdConditions || [], '追加条件なし');
@@ -1317,7 +1925,7 @@ function showConsensus(consensus) {
     document.getElementById('consensus').classList.add('show');
 }
 
-async function revealDeliberation(data, runId) {
+async function revealDeliberation(data, runId, mode) {
     for (const key of PANEL_KEYS) {
         if (runId !== activeRunId) return;
         panelElements(key).stEl.textContent = 'REVEALING...';
@@ -1329,7 +1937,7 @@ async function revealDeliberation(data, runId) {
     if (runId !== activeRunId) return;
     await wait(CONSENSUS_REVEAL_DELAY);
     if (runId !== activeRunId) return;
-    showConsensus(data.consensus);
+    showConsensus(data.consensus, mode);
 }
 
 function abortActiveRequest() {
@@ -1340,43 +1948,69 @@ function abortActiveRequest() {
 }
 
 async function execute() {
+    const mode = getSelectedMode();
     const apiKey = document.getElementById('keyGemini').value.trim();
     const query = document.getElementById('queryInput').value.trim();
 
-    if (!apiKey) {
-        document.getElementById('apiBody').classList.add('open');
-        document.getElementById('apiIcon').textContent = '∧';
-        alert('APIキーが未入力です。\n下の「API KEY 設定」セクションを確認してください。');
+    clearFieldErrors();
+    clearBanner();
+
+    if (!query) {
+        setFieldError('queryInput', '問いを入力してください。利害がぶつかるテーマほど MAGI が割れます。');
+        showBanner({
+            variant: 'warning',
+            title: '問いが未入力です',
+            message: 'まずは 1 行でいいので、「何を導入すべきか」「どこまで自動化すべきか」を入力してください。',
+            hints: ['例: 生成AIで採用一次面接を自動化すべきか', '例: 従業員監視AIを導入すべきか'],
+            actionType: 'focus-query',
+            actionLabel: '問いを入力する'
+        });
+        document.getElementById('queryInput').focus();
         return;
     }
-    if (!query) {
-        alert('質問を入力してください');
+    if (mode === 'gemini' && !apiKey) {
+        toggleApi(true);
+        setFieldError('keyGemini', 'GEMINI モードでは API キーが必要です。無料で試すだけなら DEMO に切り替えられます。');
+        showBanner({
+            variant: 'warning',
+            title: 'API キーが未入力です',
+            message: 'GEMINI を選んだまま START したため、審議を開始できませんでした。',
+            hints: ['Google AI Studio で取得したキーを貼り付ける', '急ぎなら DEMO モードへ切り替えて遊ぶ'],
+            actionType: 'open-api',
+            actionLabel: 'API 設定を開く'
+        });
+        document.getElementById('keyGemini').focus();
         return;
     }
 
     activeRunId += 1;
     const runId = activeRunId;
     abortActiveRequest();
-    const controller = new AbortController();
+    const controller = mode === 'gemini' ? new AbortController() : null;
     activeController = controller;
 
-    const btn = document.getElementById('startBtn');
-    btn.disabled = true;
-    btn.textContent = '▶ PROCESSING...';
-
+    setInteractiveState(true);
     clearConsensus();
-    PANEL_KEYS.forEach(key => setPanelPending(key));
+    PANEL_KEYS.forEach(key => setPanelPending(key, mode));
     document.getElementById('motionDisplay').textContent = `MOTION: ${query}`;
 
     try {
+        if (mode === 'demo') {
+            const demoData = buildDemoDeliberation(query);
+            if (runId !== activeRunId) return;
+            document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
+            await revealDeliberation(demoData, runId, mode);
+            return;
+        }
+
         const responsePayload = await callGeminiOnce(buildSingleMagiPrompt(), query, apiKey, controller.signal);
         if (runId !== activeRunId) return;
 
-        const data = buildValidatedDeliberation(responsePayload.text, responsePayload);
+        const validated = buildValidatedDeliberation(responsePayload.text, responsePayload);
         if (runId !== activeRunId) return;
 
-        document.getElementById('motionDisplay').textContent = `MOTION: ${query} // LOCAL REVEAL`;
-        await revealDeliberation(data, runId);
+        document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
+        await revealDeliberation(validated, runId, mode);
     } catch (error) {
         if (error?.name === 'AbortError' || runId !== activeRunId) return;
         if (error?.code === 'FORMAT_ERROR' || error?.code === 'TRUNCATED') {
@@ -1393,8 +2027,7 @@ async function execute() {
             activeController = null;
         }
         if (runId === activeRunId) {
-            btn.disabled = false;
-            btn.textContent = '▶ START';
+            setInteractiveState(false);
         }
     }
 }
@@ -1402,10 +2035,8 @@ async function execute() {
 function resetAll() {
     activeRunId += 1;
     abortActiveRequest();
-
-    const btn = document.getElementById('startBtn');
-    btn.disabled = false;
-    btn.textContent = '▶ START';
+    setInteractiveState(false);
+    clearFieldErrors();
 
     PANEL_KEYS.forEach(key => {
         const { bodyEl, vtEl, stEl, swEl } = panelElements(key);
@@ -1419,13 +2050,42 @@ function resetAll() {
     });
 
     clearConsensus();
-    document.getElementById('queryInput').value = '';
-    document.getElementById('motionDisplay').textContent = '— AWAIT CONFLICT QUERY —';
+    document.getElementById('motionDisplay').textContent = DEFAULT_MOTION;
+    showBanner({
+        variant: 'info',
+        title: '審議を中断しました',
+        message: '問いは残しています。修正してそのまま再実行できます。',
+        hints: ['必要なら RUN MODE を切り替える', '問いを少し短くして再試行する'],
+        actionType: 'focus-query',
+        actionLabel: '問いを編集する'
+    });
 }
+
+document.getElementById('bannerAction').addEventListener('click', () => {
+    handleBannerAction(bannerActionType);
+});
+
+document.querySelectorAll('input[name="runMode"]').forEach(input => {
+    input.addEventListener('change', () => {
+        clearFieldErrors();
+        clearBanner();
+        syncModeUi();
+    });
+});
+
+document.getElementById('queryInput').addEventListener('input', () => {
+    clearFieldError('queryInput');
+});
+
+document.getElementById('keyGemini').addEventListener('input', () => {
+    clearFieldError('keyGemini');
+});
 
 document.getElementById('queryInput').addEventListener('keydown', event => {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) execute();
 });
+
+syncModeUi();
 </script>
 </body>
 </html>
