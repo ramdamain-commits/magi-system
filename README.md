@@ -1,6 +1,6 @@
 ﻿# MAGI System
 
-MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議させ、重要な判断の blind spot を見つけるための実験的な意思決定 UI です。現在は `DEMO`、`LOCAL AI`、`GEMINI` の 3 モードを持ち、無料で遊べる疑似審議、ブラウザ内のローカル推論、1 回の Gemini リクエストで返す実AI審議を切り替えられます。合議はどのモードでも UI 側で合成し、ゲーム性を保ったまま読みやすさと API 負荷を両立します。
+MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議させ、重要な判断の blind spot を見つけるための実験的な意思決定 UI です。現在は `DEMO` と `GEMINI` の 2 モードを持ち、無料で遊べる疑似審議と、1 回の Gemini リクエストで返す実AI審議を切り替えられます。合議は UI 側で合成し、ゲーム性を保ったまま読みやすさと API 負荷を両立します。
 
 ## 開発目的
 
@@ -27,22 +27,19 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 - 出力は JSON 形式の短い構造化レスポンスに限定し、`理由` は最大 1 件、`承認条件` は最大 1 件に抑える
 - `RESET` では進行中のリクエストを中断し、無駄な消費を止める
 - `DEMO` は API を使わず、疑似審議で割れ方を体験するための無料フォールバックとする
-- `LOCAL AI` は WebGPU 対応ブラウザでローカル推論を行い、無料で実AI審議を試せるルートとする
 - 将来的な追加策として、ローカル再生キャッシュと必要時のみの少数意見再生成を検討する
 
 ## 使い方
 
-1. まず `RUN MODE` で `DEMO`、`LOCAL AI`、`GEMINI` のいずれかを選ぶ
-2. `LOCAL AI` は WebGPU 対応ブラウザで使う。初回はローカルモデル読込に時間がかかる
-3. `GEMINI` を使う場合だけ、[Google AI Studio](https://aistudio.google.com) で取得した API キーを `API KEY` 欄に入力する
-4. 利害が割れそうな問いを入力して `START` を押す
-5. 各パネルの `理由 / 最大リスク / 承認条件 / 判定` を見比べる
-6. 最後に `MAJORITY VIEW / MINORITY VIEW / HOLD CONDITIONS / RECOMMENDED ACTION` を読む
+1. まず `RUN MODE` で `DEMO` か `GEMINI` を選ぶ
+2. `GEMINI` を使う場合だけ、[Google AI Studio](https://aistudio.google.com) で取得した API キーを `API KEY` 欄に入力する
+3. 利害が割れそうな問いを入力して `START` を押す
+4. 各パネルの `理由 / 最大リスク / 承認条件 / 判定` を見比べる
+5. 最後に `MAJORITY VIEW / MINORITY VIEW / HOLD CONDITIONS / RECOMMENDED ACTION` を読む
 
 ## 実行モード
 
 - `DEMO`: 無料、キー不要。ブラウザ内の疑似審議で、割れ方と UI の流れを試せる
-- `LOCAL AI`: 無料、キー不要。WebLLM を使う実験的なローカル推論。WebGPU と secure context が必要で、初回はモデルをダウンロードする
 - `GEMINI`: 実AIモード。1 回の Gemini 呼び出しで 3 人格の審議をまとめて返す
 
 ## UI / エラー方針
@@ -51,7 +48,8 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 - モバイルでは 3 パネルを縦積みにし、CASPAR / MELCHIOR の本文が潰れないようにする
 - 入力エラーや通信エラーは `alert()` ではなく画面内のバナーと入力欄下の案内で示す
 - `RESET` は問いを消さずに審議だけを中断し、修正して再実行しやすくする
-- `LOCAL AI` では `WebGPU 非対応`、`モデル初期化失敗`、`ローカル応答崩れ` を分けて案内する
+
+`LOCAL AI` の PoC で得た知見と廃止理由は [docs/HANDOFF.md](docs/HANDOFF.md) の `KPT` に残しています。再挑戦する場合は、そこを起点に進めます。
 
 ## 開発ファイル
 

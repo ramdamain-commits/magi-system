@@ -5,11 +5,11 @@
 ## 1. 現在地
 
 - 現行アプリは `index.html` の単一ファイル構成
-- `RUN MODE` は `DEMO`、`LOCAL AI`、`GEMINI` の 3 モード
+- `RUN MODE` は `DEMO` と `GEMINI` の 2 モード
 - `DEMO` はブラウザ内の疑似審議で、API キーなしの無料体験用
-- `LOCAL AI` は WebLLM を使ったローカル推論で、WebGPU 対応ブラウザなら API キーなしで実AI審議を試せる
 - `GEMINI` は API を 1 回だけ呼び、モデルには `panels` を返させて合議は UI 側でローカル合成する
 - 入力ミスと通信失敗は `alert()` ではなく、画面上部バナーと inline エラーで案内する
+- `LOCAL AI` は PoC の実機 QA で安定基準を満たせず、ユーザー向けモードから外した
 - GitHub Pages 公開先は削除済み（旧 URL: `https://ramdamain-commits.github.io/test-project/`）
 - 文字コード運用は `.editorconfig` が source of truth。PR では `.github/workflows/text-encoding-check.yml` が `scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning` を実行する
 
@@ -32,51 +32,52 @@
 ### 実行モードと API 方針
 
 - `DEMO` は API を使わず、割れ方と UI フローを試すための疑似審議
-- `LOCAL AI` は WebGPU と secure context 上で WebLLM を読み込み、`response_format` の JSON で panels を返させる
 - `GEMINI` は external call を原則 1 回に制限し、structured output で JSON を返させる
 - `RESET` では `AbortController` で Gemini リクエストを中断し、質問文は残す
-- 失敗系は `LOCAL_UNSUPPORTED / LOCAL_INIT / LOCAL_RUN / TRUNCATED / FORMAT / EMPTY / SAFETY / QUOTA / RATE LIMIT / AUTH / REQUEST / NETWORK` を大別し、画面内で案内する
+- 失敗系は `TRUNCATED / FORMAT / EMPTY / SAFETY / QUOTA / RATE LIMIT / AUTH / REQUEST / NETWORK` を大別し、画面内で案内する
 
 ## 3. コード上の重要ポイント
 
-- `HOW TO PLAY` と `RUN MODE` の UI は `index.html` の 745 行付近以降
-- モード定義、モデル名、schema は `index.html` の 948 行付近以降
-- `panels only` の指示は `index.html` の 1235 行付近
-- JSON 抽出は `index.html` の 1348 行付近以降
-- 合議のローカル合成は `index.html` の 1545 行付近以降
-- `DEMO` の疑似審議生成は `index.html` の 1655 行付近以降
-- `LOCAL AI` の WebLLM 読込と推論は `index.html` の 1670 行付近以降
-- Gemini 呼び出しは `index.html` の 1770 行付近以降
-- エラー分類は `index.html` の 1818 行付近以降
-- 画面内エラー表示と合議描画は `index.html` の 1879 行付近以降
-- 実行フローと `RESET` は `index.html` の 1950 行付近以降
+- `HOW TO PLAY` と `RUN MODE` の UI は `index.html` の `quickstart` と `setup-wrap`
+- モード定義、schema、人格定義は `RUN_MODE_META`、`MAGI_RESPONSE_SCHEMA`、`MAGI`
+- `panels only` の指示は `buildSingleMagiPrompt()`
+- JSON 抽出は `extractJsonPayload()` と `buildValidatedDeliberation()`
+- 合議のローカル合成は `buildConsensusFromPanels()`
+- `DEMO` の疑似審議生成は `buildDemoDeliberation()`
+- Gemini 呼び出しは `callGeminiOnce()`
+- エラー分類は `classifyError()`
+- 実行フローと `RESET` は `execute()` と `resetAll()`
 
-## 4. 既知の論点
+## 4. KPT
 
-### 優先で触るべきもの
+### Keep
 
-1. `panels only` 契約の整理  
-   プロンプトでは `consensus を返さない` としているが、受信側ではまだ `payload.consensus` を読む後方互換分岐が残っている。  
-   参照箇所: `index.html` の 1235 行付近、1608 行付近
+- `DEMO` は API キー不要で UX の入口として有効だった。無料体験ルートとして今後も維持しやすい
+- `GEMINI` を 1 回だけ呼んで、`panels` から UI 側で合議を作る構成は、コストと演出の両立に向いている
+- `LOCAL AI` でも 3 人格一括生成より panel 個別生成の方が完走率は上がった。この知見は別 PoC でも再利用できる
 
-2. `LOCAL AI` の実機 QA  
-   分岐と UI は入ったが、この環境では WebGPU を持つ自動テストブラウザが使えず、実モデルでの成功確認は未了。  
-   失敗しやすい観点は `LOCAL_INIT`、`FORMAT ERROR`、低VRAM端末での初期化失敗、初回ダウンロード時間。
+### Problem
 
-3. ゲーム性の本命機能が未着手  
-   `再審議ループ`、差分比較、良い問いテンプレ導線、ローカルモデル切替 UI はまだ未実装。
+- `LOCAL AI` の実機 QA は安定しなかった。Windows + Chrome 146 + WebLLM で、3人格一括生成は `5/5` 件が `finishReason:length` で失敗した
+- panel 個別生成へ寄せると完走率は一時 `4/5` まで上がったが、空欄寄り、英単語混入、`approve / none / high` のような粗い値が混ざり、品質が足りなかった
+- schema を締めた再計測では `2/5` 成功、`max_tokens=240` の抜き打ち再計測でも `1/2` 成功に留まった
+- 小型ローカルモデルは WebGPU、VRAM、ブラウザ差分の影響が大きく、無料化の入口としては説明コストと失敗率が高すぎた
 
-### いまは問題ではないもの
+### Try
 
-- 文字コードチェックは repo 内の tracked text files を対象に拡張済み
-- `.editorconfig` と checker の source of truth ずれは解消済み
-- PR テンプレは日本語化済み
+- ローカル推論を再挑戦するなら、ユーザー向けモードには戻さず PoC ブランチか別スレッドで進める
+- 1B 前提の微調整より、JSON 完走率が高い 2B〜3B 級モデルや別 family を先に検証する
+- 再導入条件は、代表質問 5 件程度で安定成功し、内容も日本語で最低限読めること。未達なら `DEMO` を無料ルートに維持する
+- fallback は最初から設計し、`TRUNCATED` や低品質時に `DEMO` か `GEMINI` へ誘導する
 
-## 5. 次にやる順番
+## 5. 既知の論点
 
-1. WebGPU が使える実ブラウザで `LOCAL AI` の初回読込と審議成功を確認する
-2. `payload.consensus` の後方互換分岐を残すか削るか決めて、`panels only` 契約に揃える
-3. `LOCAL AI` のモデル切替や軽量モデル fallback を検討する
+1. `panels only` 契約の整理
+   プロンプトでは `consensus を返さない` としているが、受信側ではまだ `payload.consensus` を読む後方互換分岐が残っている。`panels` だけで成立する形へ寄せる余地がある
+2. ゲーム性の本命機能が未着手
+   `再審議ループ`、差分比較、良い問いテンプレ導線はまだ未実装
+3. `LOCAL AI` 再挑戦の優先度は低い
+   再着手するなら、現行 UI へ戻す前に PoC と QA 条件を先に置く
 
 ## 6. 実 API QA の最小セット
 
@@ -94,7 +95,8 @@
 - 少数意見が残るか
 - `2 approve / 1 reject` と最終判定の整合が取れているか
 - `RESET` でリクエスト中断が効くか
-- `LOCAL AI` では初回ダウンロード進捗が見えるか、未対応ブラウザで専用案内に落ちるか
+- `DEMO` は無料体験として違和感なく流れが分かるか
+- `GEMINI` は API キー未入力時の画面内エラーが分かりやすいか
 
 ## 7. よく使うコマンド
 
@@ -106,12 +108,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-TextEncoding.
 git status --short --branch
 
 # 公開サイト
-# GitHub repo 削除済み — 公開サイトなし
+# GitHub repo 削除済み - 公開サイトなし
 ```
 
-## 8. 直近の履歴（GitHub repo 削除済み — PR リンクはアーカイブ参照）
+## 8. 直近の履歴（GitHub repo 削除済み - PR リンクはアーカイブ参照）
 
-- 2026-03-25: `LOCAL AI` モードを追加し、WebLLM によるローカル推論の PoC を入れた
+- 2026-03-25: WebLLM を使う `LOCAL AI` の PoC を試し、実機 QA で `finishReason:length` と低品質応答の傾向を確認した
+- 2026-03-25: `LOCAL AI` をユーザー向けモードから外し、知見をこの文書の `KPT` に集約した
 - 2026-03-24: `DEMO` / `GEMINI` の 2 モード化、初回導線の再配置、画面内バナーと inline エラーを追加
 - PR #16: 文字コードチェッカーの対象を tracked text files まで拡張
 - PR #15: checker が `.editorconfig` の `charset` を参照するよう修正
@@ -122,5 +125,6 @@ git status --short --branch
 ## 9. 次スレッドの最初に伝えると早いこと
 
 - `docs/HANDOFF.md` を前提に会話を始めること
-- もし次が実装スレッドなら、「まず LOCAL AI の実機 QA か panels-only 契約整理から」と明示するとブレにくい
+- `LOCAL AI` は UI から外しているが、PoC の知見は `KPT` に残っていると最初に共有すると早い
+- もし次が実装スレッドなら、「まず `panels only` 契約整理かゲーム性の強化から」と明示するとブレにくい
 - 実 API を流す場合は free tier の quota にすぐ当たるので、テスト回数を絞ること

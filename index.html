@@ -157,7 +157,7 @@
         }
         .mode-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             padding: 0 12px 12px;
         }
@@ -743,11 +743,11 @@
 
 <div class="quickstart">
     <div class="quickstart-label">HOW TO PLAY</div>
-        <div class="quickstart-steps">
-            <div class="step-card">
-                <span class="step-index">STEP 1</span>
-            <div class="step-text">まずは `DEMO` で無料体験。ローカル無料なら `LOCAL AI`、実AIで回すときだけ `GEMINI` を選びます。</div>
-            </div>
+    <div class="quickstart-steps">
+        <div class="step-card">
+            <span class="step-index">STEP 1</span>
+            <div class="step-text">まずは `DEMO` で無料体験。実AIで回すときだけ `GEMINI` を選びます。</div>
+        </div>
         <div class="step-card">
             <span class="step-index">STEP 2</span>
             <div class="step-text">利害がぶつかる問いを入力します。小規模導入、監視、採用、炎上案件が割れやすいです。</div>
@@ -770,14 +770,6 @@
                     <span class="mode-card-title">DEMO</span>
                     <span class="mode-card-meta">無料 / キー不要</span>
                     <span class="mode-card-copy">ブラウザ内の疑似審議で遊べます。初回導入や回線不調時のフォールバック向けです。</span>
-                </span>
-            </label>
-            <label class="mode-card">
-                <input type="radio" name="runMode" value="local" />
-                <span class="mode-card-body">
-                    <span class="mode-card-title">LOCAL AI</span>
-                    <span class="mode-card-meta">無料 / 実験的</span>
-                    <span class="mode-card-copy">WebGPU 対応ブラウザでローカル推論します。初回はモデル読込に時間がかかり、環境差があります。</span>
                 </span>
             </label>
             <label class="mode-card">
@@ -952,9 +944,6 @@ const DEFAULT_MOTION = '— AWAIT CONFLICT QUERY —';
 const PANEL_REVEAL_DELAY = 260;
 const CONSENSUS_REVEAL_DELAY = 220;
 const GEMINI_MODEL = 'gemini-2.5-flash';
-const LOCAL_WEBLLM_IMPORT_URL = 'https://esm.run/@mlc-ai/web-llm';
-const LOCAL_WEBLLM_MODEL_ID = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-const LOCAL_WEBLLM_MODEL_LABEL = 'Llama 3.2 1B (WebLLM)';
 const LATENT_MINORITY_TEXT = '満場一致だが潜在的な反対論点は残る。';
 const RUN_MODE_META = {
     demo: {
@@ -964,14 +953,6 @@ const RUN_MODE_META = {
         pendingStatus: 'LOCAL SIMULATION',
         pendingBody: '[ LOCAL SIMULATION ]\n> seeded deliberation prepared\n> local reveal queue active',
         resultSuffix: 'DEMO MODE / LOCAL REVEAL'
-    },
-    local: {
-        label: 'LOCAL AI',
-        description: 'LOCAL AI は無料の実験的ローカル推論です。WebGPU 対応ブラウザでモデルを読み込み、審議をブラウザ内で完結させます。',
-        apiNote: `LOCAL AI モードでは API キー不要です。初回は ${LOCAL_WEBLLM_MODEL_LABEL} の読込に時間がかかり、HTTPS か localhost と WebGPU が必要です。環境差で失敗することがあります。`,
-        pendingStatus: 'LOCAL INFERENCE',
-        pendingBody: '[ LOCAL MODEL ]\n> webgpu capability check\n> on-device model booting',
-        resultSuffix: 'LOCAL MODEL / ON-DEVICE REVEAL'
     },
     gemini: {
         label: 'GEMINI',
@@ -1125,11 +1106,6 @@ const DEMO_LIBRARY = {
 let activeRunId = 0;
 let activeController = null;
 let bannerActionType = null;
-let localModulePromise = null;
-let localEnginePromise = null;
-let localEngine = null;
-let localProgressSignature = '';
-let localProgressRunId = 0;
 
 function getSelectedMode() {
     return document.querySelector('input[name="runMode"]:checked')?.value || 'demo';
@@ -1159,11 +1135,7 @@ function syncModeUi() {
     const apiSection = document.getElementById('apiSection');
     document.getElementById('modeDescription').textContent = meta.description;
     document.getElementById('apiModeNote').textContent = meta.apiNote;
-    document.getElementById('startBtn').textContent = mode === 'demo'
-        ? '▶ START DEMO'
-        : mode === 'local'
-            ? '▶ START LOCAL AI'
-            : '▶ START GEMINI';
+    document.getElementById('startBtn').textContent = mode === 'demo' ? '▶ START DEMO' : '▶ START GEMINI';
     apiSection.hidden = mode !== 'gemini';
     if (mode === 'gemini') {
         toggleApi(true);
@@ -1182,9 +1154,7 @@ function setInteractiveState(isBusy) {
     if (isBusy) {
         document.getElementById('startBtn').textContent = getSelectedMode() === 'demo'
             ? '▶ PROCESSING DEMO...'
-            : getSelectedMode() === 'local'
-                ? '▶ LOADING LOCAL AI...'
-                : '▶ PROCESSING GEMINI...';
+            : '▶ PROCESSING GEMINI...';
         return;
     }
     syncModeUi();
@@ -1249,14 +1219,6 @@ function handleBannerAction(actionType) {
         document.getElementById('queryInput').focus();
         return;
     }
-    if (actionType === 'switch-demo') {
-        document.querySelector('input[name="runMode"][value="demo"]').checked = true;
-        clearFieldErrors();
-        clearBanner();
-        syncModeUi();
-        document.getElementById('queryInput').focus();
-        return;
-    }
     if (actionType === 'retry') {
         execute();
     }
@@ -1291,30 +1253,6 @@ function buildSingleMagiPrompt() {
     lines.push('重要: schema どおりの panels JSON だけを返し、値は短く詰めてください。');
 
     return lines.join('\n');
-}
-
-function buildLocalMagiPrompt() {
-    return [
-        'You are MAGI SYSTEM.',
-        'Return compact JSON only.',
-        'Do not output markdown, prose, or consensus.',
-        'Use exactly this shape: {"panels":{"b":{"conclusion":"","reasons":[""],"risk":"","conditions":[],"verdict":"approve"},"c":{"conclusion":"","reasons":[""],"risk":"","conditions":[],"verdict":"reject"},"m":{"conclusion":"","reasons":[""],"risk":"","conditions":[],"verdict":"approve"}}}.',
-        'Need exactly three panels: b, c, m.',
-        'Each panel needs one short reason and zero or one condition.',
-        'Verdict must be approve or reject.',
-        'Write concise Japanese text for conclusion, reasons, risk, and conditions.',
-        'b questions assumptions and hype.',
-        'c questions harm, bias, abuse, and rights.',
-        'm questions operations, ownership, rollback, and cost.',
-        'At least one panel should dissent when the topic is arguable.'
-    ].join('\n');
-}
-
-function tagRuntimeError(error, runtime) {
-    if (error && typeof error === 'object') {
-        error.runtime = runtime;
-    }
-    return error;
 }
 
 function cleanLine(value) {
@@ -1725,140 +1663,6 @@ function buildDemoDeliberation(query) {
     };
 }
 
-function localRuntimeSupported() {
-    return Boolean(window.__MAGI_FORCE_LOCAL_GPU__ || navigator.gpu);
-}
-
-function localRuntimeSecure() {
-    return window.isSecureContext || ['localhost', '127.0.0.1'].includes(location.hostname);
-}
-
-function updateLocalProgress(report) {
-    if (localProgressRunId !== activeRunId) return;
-    const percent = Number.isFinite(report?.progress) ? Math.max(0, Math.min(100, Math.round(report.progress * 100))) : null;
-    const text = cleanLine(report?.text || 'ローカルモデルを準備中');
-    const signature = `${percent ?? 'na'}:${text}`;
-    if (signature === localProgressSignature) return;
-    localProgressSignature = signature;
-    showBanner({
-        variant: 'info',
-        title: 'LOCAL AI を準備中です',
-        message: percent === null ? text : `${text} (${percent}%)`,
-        hints: [
-            `${LOCAL_WEBLLM_MODEL_LABEL} をブラウザ内へ読み込みます`,
-            '初回だけ数分かかることがあります',
-            '完了後はキャッシュを再利用します'
-        ],
-        panelStatus: 'LOCAL BOOT'
-    });
-}
-
-async function importLocalRuntimeModule() {
-    if (!localModulePromise) {
-        localModulePromise = (typeof window.__MAGI_WEBLLM_IMPORT__ === 'function'
-            ? Promise.resolve(window.__MAGI_WEBLLM_IMPORT__())
-            : import(LOCAL_WEBLLM_IMPORT_URL))
-            .catch(error => {
-                localModulePromise = null;
-                throw error;
-            });
-    }
-    return localModulePromise;
-}
-
-async function ensureLocalEngine() {
-    if (!localRuntimeSecure()) {
-        throw tagRuntimeError(
-            createStructuredError('LOCAL_UNSUPPORTED', 'secure context required'),
-            'local'
-        );
-    }
-    if (!localRuntimeSupported()) {
-        throw tagRuntimeError(
-            createStructuredError('LOCAL_UNSUPPORTED', 'webgpu unavailable'),
-            'local'
-        );
-    }
-    if (localEngine) return localEngine;
-    if (!localEnginePromise) {
-        localEnginePromise = (async () => {
-            try {
-                const webllm = await importLocalRuntimeModule();
-                const createEngine = webllm?.CreateMLCEngine || webllm?.default?.CreateMLCEngine;
-                if (typeof createEngine !== 'function') {
-                    throw new Error('CreateMLCEngine is not available');
-                }
-                const engine = await createEngine(LOCAL_WEBLLM_MODEL_ID, {
-                    initProgressCallback: updateLocalProgress
-                });
-                localEngine = engine;
-                localProgressSignature = '';
-                return engine;
-            } catch (error) {
-                localEnginePromise = null;
-                localEngine = null;
-                throw tagRuntimeError(
-                    createStructuredError('LOCAL_INIT', cleanLine(error?.message || 'local runtime init failed')),
-                    'local'
-                );
-            }
-        })();
-    }
-    return localEnginePromise;
-}
-
-async function callLocalOnce(systemPrompt, query, runId) {
-    localProgressRunId = runId;
-    const engine = await ensureLocalEngine();
-    if (runId !== activeRunId) {
-        throw tagRuntimeError(createStructuredError('LOCAL_ABORT', 'run superseded'), 'local');
-    }
-
-    try {
-        if (typeof engine.resetChat === 'function') {
-            await engine.resetChat();
-        }
-    } catch {
-        // resetChat は使えなくても継続する
-    }
-
-    let response;
-    try {
-        response = await engine.chat.completions.create({
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: `審議対象:\n${query}` }
-            ],
-            temperature: 0.25,
-            max_tokens: 420,
-            seed: hashText(`local:${query}`),
-            response_format: {
-                type: 'json_object',
-                schema: JSON.stringify(MAGI_RESPONSE_SCHEMA)
-            }
-        });
-    } catch (error) {
-        throw tagRuntimeError(
-            createStructuredError('LOCAL_RUN', cleanLine(error?.message || 'local inference failed')),
-            'local'
-        );
-    }
-
-    const content = response?.choices?.[0]?.message?.content;
-    const text = Array.isArray(content)
-        ? content.map(part => part?.text || '').join('').trim()
-        : String(content || '').trim();
-
-    if (!text) {
-        throw tagRuntimeError(createStructuredError('EMPTY', '[Local AI から応答を受信できませんでした]'), 'local');
-    }
-
-    return {
-        text,
-        finishReason: response?.choices?.[0]?.finish_reason || null
-    };
-}
-
 async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
@@ -1911,52 +1715,12 @@ function classifyError(error) {
     const message = String(error?.message || '');
     const lowered = message.toLowerCase();
 
-    if (error?.code === 'LOCAL_UNSUPPORTED') {
-        return {
-            variant: 'warning',
-            title: 'LOCAL AI を開始できませんでした',
-            message: 'このブラウザでは WebGPU か secure context が不足しており、ローカル推論を起動できません。',
-            hints: ['Chrome / Edge の最新安定版で開く', 'HTTPS または localhost で開く', 'すぐ遊ぶなら DEMO、実AIなら GEMINI に切り替える'],
-            actionType: 'switch-demo',
-            actionLabel: 'DEMO に切替',
-            panelStatus: 'LOCAL'
-        };
-    }
-
-    if (error?.code === 'LOCAL_INIT') {
-        return {
-            variant: 'warning',
-            title: 'LOCAL AI の準備に失敗しました',
-            message: 'モデルの読込か初期化で止まりました。ブラウザの GPU 状態や通信状態を確認してください。',
-            hints: ['初回読込は時間がかかります', '他の GPU 負荷が高いアプリを閉じる', '継続して失敗するなら DEMO か GEMINI を使う'],
-            actionType: 'retry',
-            actionLabel: 'もう一度実行',
-            panelStatus: 'LOCAL INIT'
-        };
-    }
-
-    if (error?.code === 'LOCAL_RUN') {
-        return {
-            variant: 'warning',
-            title: 'LOCAL AI の審議が途中で止まりました',
-            message: 'ローカル推論の途中で失敗しました。モデルは読み込めても、生成で止まることがあります。',
-            hints: ['問いを少し短くする', '一度 RESET して再試行する', '安定優先なら GEMINI を使う'],
-            actionType: 'retry',
-            actionLabel: 'もう一度実行',
-            panelStatus: 'LOCAL RUN'
-        };
-    }
-
     if (error?.code === 'TRUNCATED' || ['MAX_TOKENS', 'length'].includes(error?.finishReason)) {
         return {
             variant: 'warning',
-            title: error?.runtime === 'local' ? 'LOCAL AI の返答が途中で切れました' : 'AI の返答が途中で切れました',
-            message: error?.runtime === 'local'
-                ? 'ローカルモデルの返答が長すぎるか、途中で切断されました。'
-                : 'Gemini の返答が長すぎるか、途中で切断されました。',
-            hints: error?.runtime === 'local'
-                ? ['問いを少し短くする', '一度 RESET して再試行する', '安定優先なら GEMINI に切り替える']
-                : ['問いを少し短くする', '一度 RESET して再試行する', 'すぐ試すだけなら DEMO に切り替える'],
+            title: 'AI の返答が途中で切れました',
+            message: 'Gemini の返答が長すぎるか、途中で切断されました。',
+            hints: ['問いを少し短くする', '一度 RESET して再試行する', 'すぐ試すだけなら DEMO に切り替える'],
             actionType: 'retry',
             actionLabel: 'もう一度実行',
             panelStatus: 'TRUNCATED'
@@ -1966,13 +1730,9 @@ function classifyError(error) {
     if (error?.code === 'FORMAT_ERROR') {
         return {
             variant: 'warning',
-            title: error?.runtime === 'local' ? 'LOCAL AI の返答形式が崩れました' : 'AI の返答形式が崩れました',
-            message: error?.runtime === 'local'
-                ? 'ローカルモデルが panels JSON を返せませんでした。小さいモデルでは形式が崩れることがあります。'
-                : buildFormatErrorMessage(message),
-            hints: error?.runtime === 'local'
-                ? ['問いを少し短くして再試行する', '安定優先なら GEMINI に切り替える']
-                : ['Gemini が panels JSON を返せなかった可能性があります', '問いを少し短くして再試行してください'],
+            title: 'AI の返答形式が崩れました',
+            message: buildFormatErrorMessage(message),
+            hints: ['Gemini が panels JSON を返せなかった可能性があります', '問いを少し短くして再試行してください'],
             actionType: 'retry',
             actionLabel: 'もう一度実行',
             panelStatus: 'FORMAT'
@@ -1982,13 +1742,9 @@ function classifyError(error) {
     if (error?.code === 'EMPTY') {
         return {
             variant: 'warning',
-            title: error?.runtime === 'local' ? 'LOCAL AI から本文を受信できませんでした' : 'Gemini から本文を受信できませんでした',
-            message: error?.runtime === 'local'
-                ? '空のローカル応答を受け取ったため、審議を表示できませんでした。'
-                : '空の応答を受け取ったため、審議を表示できませんでした。',
-            hints: error?.runtime === 'local'
-                ? ['一度 RESET して再試行する', '継続して失敗するなら DEMO か GEMINI に切り替える']
-                : ['少し待ってから再試行してください', '継続して失敗するなら DEMO モードへ切り替えてください'],
+            title: 'Gemini から本文を受信できませんでした',
+            message: '空の応答を受け取ったため、審議を表示できませんでした。',
+            hints: ['少し待ってから再試行してください', '継続して失敗するなら DEMO モードへ切り替えてください'],
             actionType: 'retry',
             actionLabel: 'もう一度実行',
             panelStatus: 'EMPTY'
@@ -2243,24 +1999,17 @@ async function execute() {
             return;
         }
 
-        const responsePayload = mode === 'local'
-            ? await callLocalOnce(buildLocalMagiPrompt(), query, runId)
-            : await callGeminiOnce(buildSingleMagiPrompt(), query, apiKey, controller.signal);
+        const responsePayload = await callGeminiOnce(buildSingleMagiPrompt(), query, apiKey, controller.signal);
         if (runId !== activeRunId) return;
 
-        let validated;
-        try {
-            validated = buildValidatedDeliberation(responsePayload.text, responsePayload);
-        } catch (error) {
-            throw mode === 'local' ? tagRuntimeError(error, 'local') : error;
-        }
+        const validated = buildValidatedDeliberation(responsePayload.text, responsePayload);
         if (runId !== activeRunId) return;
 
         clearBanner();
         document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
         await revealDeliberation(validated, runId, mode);
     } catch (error) {
-        if (error?.name === 'AbortError' || error?.code === 'LOCAL_ABORT' || runId !== activeRunId) return;
+        if (error?.name === 'AbortError' || runId !== activeRunId) return;
         if (error?.code === 'FORMAT_ERROR' || error?.code === 'TRUNCATED') {
             console.warn('[MAGI] format error detail', {
                 code: error.code,
@@ -2283,7 +2032,6 @@ async function execute() {
 function resetAll() {
     activeRunId += 1;
     abortActiveRequest();
-    localProgressRunId = 0;
     setInteractiveState(false);
     clearFieldErrors();
 
