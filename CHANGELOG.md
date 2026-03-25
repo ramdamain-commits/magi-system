@@ -1,5 +1,22 @@
 ﻿# Changelog
 
+## 2026-03-25
+
+### Added
+
+- `index.html` に `LOCAL AI` 実行モードを追加し、WebGPU 対応ブラウザで WebLLM によるローカル推論を試せるようにした
+- `LOCAL AI` の初回モデル読込進捗を上部バナーで案内し、完了後はブラウザキャッシュを再利用する流れを追加した
+
+### Changed
+
+- `RUN MODE` を `DEMO / LOCAL AI / GEMINI` の 3 モード構成へ拡張し、`HOW TO PLAY` と開始ボタン文言を新構成に合わせて更新した
+- `GEMINI` 専用だった API キー導線を、`GEMINI` 選択時だけ表示する挙動に整理した
+- `README.md`、`docs/UPDATE_POLICY.md`、`docs/HANDOFF.md`、`CLAUDE.md` を `LOCAL AI` モード前提へ更新した
+
+### Fixed
+
+- `LOCAL AI` が使えない環境で原因が分からないまま止まらないように、`WebGPU / secure context 不足`、`モデル初期化失敗`、`ローカル推論失敗` を分けて画面内案内するようにした
+
 ## 2026-03-24
 
 ### Added
