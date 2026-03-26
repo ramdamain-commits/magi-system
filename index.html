@@ -679,12 +679,198 @@
         }
         .banner-action[hidden] { display: none; }
 
+        /* ━━ LOCAL AI EXPERIMENTAL ━━ */
+        .mode-card-body.experimental {
+            position: relative;
+        }
+        .experimental-badge {
+            display: inline-block;
+            font-size: .6em;
+            color: #ff9900;
+            border: 1px solid #ff9900;
+            padding: 1px 5px;
+            letter-spacing: .08em;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .local-progress {
+            margin: 0 10px 10px;
+            border: 1px solid var(--amber-dim);
+            background: #0b0903;
+            padding: 10px 12px;
+            display: none;
+        }
+        .local-progress.show { display: block; }
+        .local-progress-label {
+            font-size: .72em;
+            color: var(--amber-soft);
+            letter-spacing: .12em;
+            margin-bottom: 6px;
+        }
+        .local-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #1a1a1a;
+            border: 1px solid var(--amber-dim);
+            margin-bottom: 6px;
+        }
+        .local-progress-fill {
+            height: 100%;
+            background: var(--amber);
+            width: 0%;
+            transition: width .3s ease;
+        }
+        .local-progress-status {
+            font-size: .7em;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* ━━ RE-DELIBERATE & DIFF ━━ */
+        .redeliberate-wrap {
+            margin: 0 10px 10px;
+            display: none;
+            gap: 8px;
+            align-items: center;
+        }
+        .redeliberate-wrap.show {
+            display: flex;
+        }
+        .btn-redeliberate {
+            flex: 0 0 auto;
+            padding: 9px 16px;
+            background: transparent;
+            border: 2px solid var(--amber);
+            color: var(--amber);
+            font-family: inherit;
+            font-size: .82em;
+            font-weight: bold;
+            letter-spacing: .18em;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn-redeliberate:hover {
+            background: var(--amber);
+            color: #000;
+            box-shadow: 0 0 20px var(--amber-glow);
+        }
+        .redeliberate-count {
+            font-size: .72em;
+            color: var(--amber-soft);
+            letter-spacing: .08em;
+        }
+
+        .diff-section {
+            margin: 0 10px 10px;
+            border: 1px solid var(--amber-dim);
+            background: #0b0903;
+            display: none;
+        }
+        .diff-section.show { display: block; }
+        .diff-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--amber-dim);
+            font-family: inherit;
+            font-size: .74em;
+            padding: 10px 12px;
+            text-align: left;
+            cursor: pointer;
+            letter-spacing: .15em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .diff-toggle:hover { color: var(--amber); }
+        .diff-body {
+            display: none;
+            border-top: 1px solid var(--amber-dim);
+            padding: 12px;
+        }
+        .diff-body.open { display: block; }
+        .diff-panel {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .diff-panel:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .diff-panel-name {
+            font-size: .78em;
+            font-weight: bold;
+            letter-spacing: .15em;
+            margin-bottom: 6px;
+        }
+        .diff-panel-name.b { color: var(--blue-accent); }
+        .diff-panel-name.c { color: var(--red-accent); }
+        .diff-panel-name.m { color: var(--grn-accent); }
+        .diff-row {
+            font-size: .76em;
+            line-height: 1.7;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .diff-changed { color: var(--amber); font-weight: bold; }
+        .diff-same { color: #6c5623; }
+        .diff-verdict-flip {
+            display: inline-block;
+            padding: 1px 6px;
+            font-size: .72em;
+            font-weight: bold;
+            letter-spacing: .1em;
+            border: 1px solid;
+            margin-left: 4px;
+        }
+        .diff-verdict-flip.to-approve { color: #00ff66; border-color: #00ff66; }
+        .diff-verdict-flip.to-reject { color: #ff3300; border-color: #ff3300; }
+
+        /* ━━ TEMPLATE CHIPS ━━ */
+        .template-section {
+            margin: 0 10px 10px;
+            border: 1px solid var(--amber-dim);
+            background: #0b0903;
+            padding: 10px 12px;
+        }
+        .template-label {
+            font-size: .68em;
+            color: var(--amber-soft);
+            letter-spacing: .18em;
+            margin-bottom: 8px;
+        }
+        .template-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .template-chip {
+            background: transparent;
+            border: 1px solid #3b2b08;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: .76em;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all .15s;
+            letter-spacing: .04em;
+        }
+        .template-chip:hover {
+            border-color: var(--amber);
+            color: var(--amber);
+            box-shadow: 0 0 8px var(--amber-glow);
+        }
+
         /* ━━ RESPONSIVE ━━ */
         @media (max-width: 720px) {
             .quickstart-steps,
             .mode-grid,
             .consensus-grid { grid-template-columns: 1fr; }
             .global-banner.show { display: grid; }
+            .redeliberate-wrap.show { flex-direction: column; align-items: stretch; }
+            .template-chips { gap: 4px; }
         }
 
         @media (max-width: 640px) {
@@ -780,6 +966,14 @@
                     <span class="mode-card-copy">Gemini API に1回だけ問い合わせて、3人格の審議をまとめて返します。</span>
                 </span>
             </label>
+            <label class="mode-card">
+                <input type="radio" name="runMode" value="local" />
+                <span class="mode-card-body experimental">
+                    <span class="mode-card-title">LOCAL AI<span class="experimental-badge">実験的</span></span>
+                    <span class="mode-card-meta">無料 / キー不要 / WebGPU必須</span>
+                    <span class="mode-card-copy">ブラウザ内でローカルLLMを実行します。初回はモデルダウンロードに時間がかかります。品質が不安定な場合はDEMOに切り替わります。</span>
+                </span>
+            </label>
         </div>
     </div>
 
@@ -820,9 +1014,29 @@
     <textarea id="queryInput" rows="2"
         placeholder="MAGIへの問いを入力...&#10;例:「生成AIで採用一次面接を自動化すべきか」「従業員監視AIを導入すべきか」"></textarea>
 </div>
-<div class="query-hint">革新、被害、運用が衝突する問いほど割れが読みやすくなります。例: 採用自動化、監視AI、匿名相談の公開、炎上対策の自動化。</div>
+<div class="template-section">
+    <div class="template-label">CONFLICT TEMPLATES // 衝突しやすい問い</div>
+    <div class="template-chips" id="templateChips">
+        <button class="template-chip" type="button">生成AIで採用一次面接を自動化すべきか</button>
+        <button class="template-chip" type="button">従業員監視AIを導入すべきか</button>
+        <button class="template-chip" type="button">学校で顔認証の出席管理を導入すべきか</button>
+        <button class="template-chip" type="button">匿名相談の内容をAIで自動公開すべきか</button>
+        <button class="template-chip" type="button">炎上対策を自動化すべきか</button>
+        <button class="template-chip" type="button">医療診断の一次スクリーニングをAIに任せるべきか</button>
+        <button class="template-chip" type="button">社内評価にAIスコアリングを導入すべきか</button>
+        <button class="template-chip" type="button">子どものSNS利用をAIで監視すべきか</button>
+    </div>
+</div>
+<div class="query-hint">革新、被害、運用が衝突する問いほど割れが読みやすくなります。テンプレートをクリックすると入力欄にセットされます。</div>
 <div class="field-help">`Ctrl + Enter` でも START できます。</div>
 <div class="field-error" id="queryInputError"></div>
+
+<!-- Local AI progress -->
+<div class="local-progress" id="localProgress">
+    <div class="local-progress-label">LOCAL AI MODEL LOADING</div>
+    <div class="local-progress-bar"><div class="local-progress-fill" id="localProgressFill"></div></div>
+    <div class="local-progress-status" id="localProgressStatus">モデルを準備しています...</div>
+</div>
 
 <!-- Controls -->
 <div class="controls">
@@ -918,6 +1132,20 @@
     </div>
 </div>
 
+<!-- Re-deliberate & Diff -->
+<div class="redeliberate-wrap" id="redeliberateWrap">
+    <button class="btn-redeliberate" id="redeliberateBtn" type="button" onclick="reDeliberate()">▶ 再審議</button>
+    <span class="redeliberate-count" id="redeliberateCount"></span>
+</div>
+
+<div class="diff-section" id="diffSection">
+    <button class="diff-toggle" type="button" onclick="toggleDiff()">
+        <span>▶ 前回との差分</span>
+        <span id="diffIcon">∨</span>
+    </button>
+    <div class="diff-body" id="diffBody"></div>
+</div>
+
 <script>
 function tick() {
     document.getElementById('clock').textContent =
@@ -961,12 +1189,32 @@ const RUN_MODE_META = {
         pendingStatus: 'REMOTE DELIBERATION',
         pendingBody: '[ INTERNAL DELIBERATION ]\n> one Gemini request armed\n> local reveal queue active',
         resultSuffix: 'SINGLE REQUEST / LOCAL REVEAL'
+    },
+    local: {
+        label: 'LOCAL AI',
+        description: 'LOCAL AI は実験的モードです。ブラウザ内で小型LLMを動かします。WebGPU対応ブラウザが必要です。品質が不安定な場合は DEMO にフォールバックします。',
+        apiNote: 'LOCAL AI モードでは API キー不要です。初回はモデルのダウンロードに数分かかります。',
+        pendingStatus: 'LOCAL INFERENCE',
+        pendingBody: '[ LOCAL AI INFERENCE ]\n> browser-local LLM armed\n> panel-by-panel generation active',
+        resultSuffix: 'LOCAL AI / EXPERIMENTAL'
     }
 };
 const FIELD_UI = {
     queryInput: { errorId: 'queryInputError', targetId: 'queryWrap' },
     keyGemini: { errorId: 'keyGeminiError', targetId: 'apiSection' }
 };
+const LOCAL_AI_CONFIG = {
+    modelId: 'Qwen2.5-3B-Instruct-q4f16_1-MLC',
+    maxTokens: 300,
+    temperature: 0.6,
+    maxRetries: 2,
+    qualityThreshold: 3
+};
+
+let localEngine = null;
+let localEngineReady = false;
+let localEngineLoading = false;
+
 const PANEL_RESPONSE_SCHEMA = {
     type: 'object',
     properties: {
@@ -1106,6 +1354,9 @@ const DEMO_LIBRARY = {
 let activeRunId = 0;
 let activeController = null;
 let bannerActionType = null;
+let deliberationCount = 0;
+let previousPanels = null;
+let previousConsensus = null;
 
 function getSelectedMode() {
     return document.querySelector('input[name="runMode"]:checked')?.value || 'demo';
@@ -1135,7 +1386,8 @@ function syncModeUi() {
     const apiSection = document.getElementById('apiSection');
     document.getElementById('modeDescription').textContent = meta.description;
     document.getElementById('apiModeNote').textContent = meta.apiNote;
-    document.getElementById('startBtn').textContent = mode === 'demo' ? '▶ START DEMO' : '▶ START GEMINI';
+    const startLabels = { demo: '▶ START DEMO', gemini: '▶ START GEMINI', local: '▶ START LOCAL AI' };
+    document.getElementById('startBtn').textContent = startLabels[mode] || '▶ START';
     apiSection.hidden = mode !== 'gemini';
     if (mode === 'gemini') {
         toggleApi(true);
@@ -1152,9 +1404,8 @@ function setInteractiveState(isBusy) {
         input.disabled = isBusy;
     });
     if (isBusy) {
-        document.getElementById('startBtn').textContent = getSelectedMode() === 'demo'
-            ? '▶ PROCESSING DEMO...'
-            : '▶ PROCESSING GEMINI...';
+        const processingLabels = { demo: '▶ PROCESSING DEMO...', gemini: '▶ PROCESSING GEMINI...', local: '▶ PROCESSING LOCAL AI...' };
+        document.getElementById('startBtn').textContent = processingLabels[getSelectedMode()] || '▶ PROCESSING...';
         return;
     }
     syncModeUi();
@@ -1372,14 +1623,13 @@ function getSourceValue(source, keys) {
 }
 
 function getPanelSource(payload, key, meta) {
-    const panels = payload?.panels && typeof payload.panels === 'object'
-        ? payload.panels
-        : payload;
-    return panels?.[key]
-        || panels?.[meta.name]
-        || panels?.[meta.name.toLowerCase()]
-        || panels?.[PANEL_LABELS[key]]
-        || panels?.[PANEL_LABELS[key].toLowerCase()]
+    const panels = payload?.panels;
+    if (!panels || typeof panels !== 'object') return null;
+    return panels[key]
+        || panels[meta.name]
+        || panels[meta.name.toLowerCase()]
+        || panels[PANEL_LABELS[key]]
+        || panels[PANEL_LABELS[key].toLowerCase()]
         || null;
 }
 
@@ -1538,7 +1788,7 @@ function getOutcomeState(approveCount, rejectCount, resolvedCount) {
     };
 }
 
-function buildConsensusFromPanels(panels, overrides = {}) {
+function buildConsensusFromPanels(panels, voteSummaryOverride) {
     const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
     const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
     const resolvedCount = approveCount + rejectCount;
@@ -1549,21 +1799,15 @@ function buildConsensusFromPanels(panels, overrides = {}) {
     const minorityKeys = outcome.majorityVerdict
         ? PANEL_KEYS.filter(key => panels[key].verdict && panels[key].verdict !== outcome.majorityVerdict)
         : [];
-    const holdConditions = sanitizeArray(getSourceValue(overrides, ['hold_conditions', 'holdConditions', 'conditions', '保留条件'])).slice(0, 4);
-    const effectiveHoldConditions = holdConditions.length
-        ? holdConditions
-        : collectHoldConditions(outcome.majorityVerdict, panels);
+    const effectiveHoldConditions = collectHoldConditions(outcome.majorityVerdict, panels);
 
     return {
         outcome,
-        voteSummary: cleanLine(getSourceValue(overrides, ['vote_summary', 'voteSummary'])) || `${approveCount} approve / ${rejectCount} reject`,
-        majorityView: cleanLine(getSourceValue(overrides, ['majority_view', 'majorityView', '多数派']))
-            || (majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。'),
-        minorityView: cleanLine(getSourceValue(overrides, ['minority_view', 'minorityView', '少数意見']))
-            || (minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels)),
+        voteSummary: voteSummaryOverride || `${approveCount} approve / ${rejectCount} reject`,
+        majorityView: majorityKeys.length ? buildPerspectiveSummary(majorityKeys, panels) : '多数派の要約を作れませんでした。',
+        minorityView: minorityKeys.length ? buildPerspectiveSummary(minorityKeys, panels) : buildLatentMinoritySummary(panels),
         holdConditions: effectiveHoldConditions,
-        recommendedAction: cleanLine(getSourceValue(overrides, ['recommended_action', 'recommendedAction', '推奨アクション']))
-            || buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
+        recommendedAction: buildActionPlan(outcome.majorityVerdict, minorityKeys, effectiveHoldConditions)
     };
 }
 
@@ -1601,13 +1845,9 @@ function buildValidatedDeliberation(rawText, responseMeta = null) {
         });
     }
 
-    const rawConsensus = payload.consensus && typeof payload.consensus === 'object'
-        ? payload.consensus
-        : payload;
-
     return {
         panels,
-        consensus: buildConsensusFromPanels(panels, rawConsensus)
+        consensus: buildConsensusFromPanels(panels)
     };
 }
 
@@ -1655,11 +1895,10 @@ function buildDemoDeliberation(query) {
         return [meta.key, createDemoPanel(query, meta, verdict)];
     }));
     rebalanceDemoPanels(query, panels, scores);
+    const demoVoteSummary = `DEMO ${PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length} approve / ${PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length} reject`;
     return {
         panels,
-        consensus: buildConsensusFromPanels(panels, {
-            voteSummary: `DEMO ${PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length} approve / ${PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length} reject`
-        })
+        consensus: buildConsensusFromPanels(panels, demoVoteSummary)
     };
 }
 
@@ -1711,9 +1950,243 @@ async function callGeminiOnce(systemPrompt, query, apiKey, signal) {
     };
 }
 
+function checkWebGpuSupport() {
+    return !!(navigator.gpu);
+}
+
+function showLocalProgress(visible, progress, status) {
+    const el = document.getElementById('localProgress');
+    const fill = document.getElementById('localProgressFill');
+    const statusEl = document.getElementById('localProgressStatus');
+    el.classList.toggle('show', visible);
+    if (progress !== undefined) fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    if (status !== undefined) statusEl.textContent = status;
+}
+
+async function ensureLocalEngine() {
+    if (localEngineReady && localEngine) return localEngine;
+    if (localEngineLoading) {
+        while (localEngineLoading) await wait(200);
+        if (localEngineReady && localEngine) return localEngine;
+        throw createStructuredError('LOCAL_INIT', 'ローカルモデルの初期化に失敗しました');
+    }
+
+    if (!checkWebGpuSupport()) {
+        throw createStructuredError('LOCAL_WEBGPU', 'このブラウザは WebGPU に対応していません。Chrome 113以降を使用してください。');
+    }
+
+    localEngineLoading = true;
+    showLocalProgress(true, 0, 'WebLLM エンジンを準備しています...');
+
+    try {
+        if (typeof webllm === 'undefined') {
+            showLocalProgress(true, 5, 'WebLLM ライブラリを読み込んでいます...');
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://esm.run/@anthropic-ai/webllm';
+                script.onload = resolve;
+                script.onerror = () => {
+                    // Try alternative CDN
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://cdn.jsdelivr.net/npm/@anthropic-ai/webllm/lib/index.min.js';
+                    script2.onload = resolve;
+                    script2.onerror = () => reject(new Error('WebLLM library load failed'));
+                    document.head.appendChild(script2);
+                };
+                document.head.appendChild(script);
+            }).catch(() => {
+                // Final fallback: try mlc-ai/web-llm
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.textContent = `
+                        import * as webllmModule from "https://esm.run/@anthropic-ai/web-llm";
+                        window.webllm = webllmModule;
+                    `;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('All WebLLM CDN sources failed'));
+                    document.head.appendChild(script);
+                });
+            });
+        }
+
+        showLocalProgress(true, 10, `モデル ${LOCAL_AI_CONFIG.modelId} をダウンロードしています...`);
+
+        const CreateMLCEngine = (typeof webllm !== 'undefined' && webllm.CreateMLCEngine)
+            || (typeof CreateMLCEngine !== 'undefined' ? CreateMLCEngine : null);
+
+        if (!CreateMLCEngine) {
+            throw new Error('WebLLM API が見つかりません。ブラウザの互換性を確認してください。');
+        }
+
+        localEngine = await CreateMLCEngine(LOCAL_AI_CONFIG.modelId, {
+            initProgressCallback: (progress) => {
+                const pct = typeof progress === 'object' ? (progress.progress || 0) * 100 : (progress || 0) * 100;
+                showLocalProgress(true, 10 + pct * 0.85, `モデルをダウンロード中... ${Math.round(pct)}%`);
+            }
+        });
+
+        localEngineReady = true;
+        showLocalProgress(true, 100, 'モデル準備完了');
+        await wait(500);
+        showLocalProgress(false);
+        return localEngine;
+    } catch (error) {
+        showLocalProgress(false);
+        localEngine = null;
+        localEngineReady = false;
+        throw createStructuredError('LOCAL_INIT', `ローカルモデル初期化エラー: ${error.message}`);
+    } finally {
+        localEngineLoading = false;
+    }
+}
+
+function buildLocalPanelPrompt(meta, query) {
+    return [
+        `あなたは${meta.name}（${meta.badge}）です。${meta.identity}`,
+        ...meta.rules.map(r => `- ${r}`),
+        '',
+        '以下のJSON形式で返答してください。JSON以外は禁止です。',
+        '{"conclusion":"18字以内","reasons":["24字以内"],"risk":"24字以内","conditions":["24字以内"],"verdict":"approve or reject"}',
+        '',
+        `審議対象: ${query}`
+    ].join('\n');
+}
+
+function scoreLocalPanelQuality(panel) {
+    let score = 0;
+    if (panel.conclusion && panel.conclusion.length > 2) score += 1;
+    if (panel.reasons?.length && panel.reasons[0].length > 2) score += 1;
+    if (panel.risk && panel.risk.length > 2) score += 1;
+    if (panel.verdict === 'approve' || panel.verdict === 'reject') score += 1;
+    // Check for Japanese content (at least some Japanese chars)
+    const allText = `${panel.conclusion}${panel.reasons?.[0] || ''}${panel.risk}`;
+    if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(allText)) score += 1;
+    return score;
+}
+
+async function callLocalPanel(engine, meta, query) {
+    const prompt = buildLocalPanelPrompt(meta, query);
+    let lastError = null;
+
+    for (let attempt = 0; attempt <= LOCAL_AI_CONFIG.maxRetries; attempt++) {
+        try {
+            const response = await engine.chat.completions.create({
+                messages: [
+                    { role: 'system', content: 'あなたは審議AIです。必ずJSON形式で返答してください。' },
+                    { role: 'user', content: prompt }
+                ],
+                max_tokens: LOCAL_AI_CONFIG.maxTokens,
+                temperature: LOCAL_AI_CONFIG.temperature + (attempt * 0.05)
+            });
+
+            const text = response.choices?.[0]?.message?.content || '';
+            if (!text.trim()) {
+                lastError = new Error('empty response');
+                continue;
+            }
+
+            const payload = extractJsonPayload(text);
+            const panel = sanitizePanelResponse(payload, meta);
+            const quality = scoreLocalPanelQuality(panel);
+
+            if (quality >= LOCAL_AI_CONFIG.qualityThreshold) {
+                return panel;
+            }
+
+            lastError = new Error(`quality score ${quality}/${LOCAL_AI_CONFIG.qualityThreshold + 2} too low`);
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    return null;
+}
+
+async function executeLocalAi(query, runId) {
+    let engine;
+    try {
+        engine = await ensureLocalEngine();
+    } catch (error) {
+        return { success: false, error };
+    }
+
+    const panels = {};
+    let failedCount = 0;
+
+    for (const meta of MAGI) {
+        if (runId !== activeRunId) return { success: false, error: new Error('aborted') };
+
+        showLocalProgress(true, undefined,
+            `${meta.name} を生成中... (${Object.keys(panels).length + 1}/${MAGI.length})`);
+
+        const panel = await callLocalPanel(engine, meta, query);
+        if (panel) {
+            panels[meta.key] = panel;
+        } else {
+            failedCount += 1;
+        }
+    }
+
+    showLocalProgress(false);
+
+    if (failedCount > 0 || Object.keys(panels).length < PANEL_KEYS.length) {
+        return {
+            success: false,
+            error: createStructuredError('LOCAL_QUALITY',
+                `${failedCount}件のパネルが品質基準を満たしませんでした。DEMO モードにフォールバックします。`),
+            partial: panels
+        };
+    }
+
+    return {
+        success: true,
+        data: {
+            panels,
+            consensus: buildConsensusFromPanels(panels, `LOCAL AI ${PANEL_KEYS.filter(k => panels[k].verdict === 'approve').length} approve / ${PANEL_KEYS.filter(k => panels[k].verdict === 'reject').length} reject`)
+        }
+    };
+}
+
 function classifyError(error) {
     const message = String(error?.message || '');
     const lowered = message.toLowerCase();
+
+    if (error?.code === 'LOCAL_WEBGPU') {
+        return {
+            variant: 'error',
+            title: 'WebGPU に対応していません',
+            message: error.message,
+            hints: ['Chrome 113以降を使用してください', 'DEMO か GEMINI モードに切り替えてください'],
+            actionType: 'focus-query',
+            actionLabel: 'モードを切替',
+            panelStatus: 'WEBGPU'
+        };
+    }
+
+    if (error?.code === 'LOCAL_INIT') {
+        return {
+            variant: 'warning',
+            title: 'ローカルモデルの初期化に失敗しました',
+            message: error.message,
+            hints: ['ブラウザを再読み込みして再試行してください', 'DEMO モードなら即座に遊べます'],
+            actionType: 'retry',
+            actionLabel: 'もう一度試す',
+            panelStatus: 'LOCAL_INIT'
+        };
+    }
+
+    if (error?.code === 'LOCAL_QUALITY') {
+        return {
+            variant: 'warning',
+            title: 'LOCAL AI の品質基準を満たしませんでした',
+            message: error.message,
+            hints: ['DEMO モードの疑似審議で代替表示しています', 'GEMINI モードなら安定した審議が得られます'],
+            actionType: null,
+            actionLabel: null,
+            panelStatus: 'LOW_QUALITY'
+        };
+    }
 
     if (error?.code === 'TRUNCATED' || ['MAX_TOKENS', 'length'].includes(error?.finishReason)) {
         return {
@@ -1982,11 +2455,12 @@ async function execute() {
     activeRunId += 1;
     const runId = activeRunId;
     abortActiveRequest();
-    const controller = mode === 'gemini' ? new AbortController() : null;
+    const controller = (mode === 'gemini') ? new AbortController() : null;
     activeController = controller;
 
     setInteractiveState(true);
     clearConsensus();
+    hideRedeliberateUi();
     PANEL_KEYS.forEach(key => setPanelPending(key, mode));
     document.getElementById('motionDisplay').textContent = `MOTION: ${query}`;
 
@@ -1996,6 +2470,45 @@ async function execute() {
             if (runId !== activeRunId) return;
             document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
             await revealDeliberation(demoData, runId, mode);
+            if (runId !== activeRunId) return;
+            updateDiffSection(demoData.panels, demoData.consensus);
+            showRedeliberateUi();
+            return;
+        }
+
+        if (mode === 'local') {
+            const localResult = await executeLocalAi(query, runId);
+            if (runId !== activeRunId) return;
+
+            if (localResult.success) {
+                clearBanner();
+                document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
+                await revealDeliberation(localResult.data, runId, mode);
+                if (runId !== activeRunId) return;
+                updateDiffSection(localResult.data.panels, localResult.data.consensus);
+                showRedeliberateUi();
+                return;
+            }
+
+            // Fallback to DEMO
+            showBanner({
+                variant: 'warning',
+                title: 'LOCAL AI がフォールバックしました',
+                message: localResult.error?.message || 'ローカルモデルの品質が基準に達しませんでした。DEMO モードの疑似審議で代替表示します。',
+                hints: [
+                    'WebGPU 対応ブラウザ（Chrome 113以降）を使用してください',
+                    'GEMINI モードなら安定した審議が得られます',
+                    'LOCAL AI は実験的機能です — 今後改善予定'
+                ],
+                actionType: null
+            });
+            const fallbackData = buildDemoDeliberation(query);
+            if (runId !== activeRunId) return;
+            document.getElementById('motionDisplay').textContent = `MOTION: ${query} // DEMO FALLBACK`;
+            await revealDeliberation(fallbackData, runId, 'demo');
+            if (runId !== activeRunId) return;
+            updateDiffSection(fallbackData.panels, fallbackData.consensus);
+            showRedeliberateUi();
             return;
         }
 
@@ -2008,6 +2521,9 @@ async function execute() {
         clearBanner();
         document.getElementById('motionDisplay').textContent = `MOTION: ${query} // ${RUN_MODE_META[mode].resultSuffix}`;
         await revealDeliberation(validated, runId, mode);
+        if (runId !== activeRunId) return;
+        updateDiffSection(validated.panels, validated.consensus);
+        showRedeliberateUi();
     } catch (error) {
         if (error?.name === 'AbortError' || runId !== activeRunId) return;
         if (error?.code === 'FORMAT_ERROR' || error?.code === 'TRUNCATED') {
@@ -2047,6 +2563,11 @@ function resetAll() {
     });
 
     clearConsensus();
+    hideRedeliberateUi();
+    showLocalProgress(false);
+    deliberationCount = 0;
+    previousPanels = null;
+    previousConsensus = null;
     document.getElementById('motionDisplay').textContent = DEFAULT_MOTION;
     showBanner({
         variant: 'info',
@@ -2057,6 +2578,112 @@ function resetAll() {
         actionLabel: '問いを編集する'
     });
 }
+
+function toggleDiff() {
+    const body = document.getElementById('diffBody');
+    const icon = document.getElementById('diffIcon');
+    const open = !body.classList.contains('open');
+    body.classList.toggle('open', open);
+    icon.textContent = open ? '∧' : '∨';
+}
+
+function buildDiffHtml(prev, curr) {
+    if (!prev || !curr) return '';
+    const parts = [];
+    PANEL_KEYS.forEach(key => {
+        const p = prev[key];
+        const c = curr[key];
+        if (!p || !c) return;
+        const meta = PANEL_META[key];
+        let rows = '';
+
+        // verdict change
+        if (p.verdict !== c.verdict) {
+            const flipClass = c.verdict === 'approve' ? 'to-approve' : 'to-reject';
+            rows += `<div class="diff-row"><span class="diff-changed">判定: ${verdictLabel(p.verdict)} → ${verdictLabel(c.verdict)}</span><span class="diff-verdict-flip ${flipClass}">${verdictLabel(c.verdict)}</span></div>`;
+        } else {
+            rows += `<div class="diff-row"><span class="diff-same">判定: ${verdictLabel(c.verdict)}（変化なし）</span></div>`;
+        }
+
+        // conclusion change
+        if (p.conclusion !== c.conclusion) {
+            rows += `<div class="diff-row"><span class="diff-changed">結論: ${p.conclusion} → ${c.conclusion}</span></div>`;
+        }
+
+        // risk change
+        if (p.risk !== c.risk) {
+            rows += `<div class="diff-row"><span class="diff-changed">リスク: ${p.risk} → ${c.risk}</span></div>`;
+        }
+
+        // reasons change
+        const prevReason = (p.reasons || [])[0] || '';
+        const currReason = (c.reasons || [])[0] || '';
+        if (prevReason !== currReason) {
+            rows += `<div class="diff-row"><span class="diff-changed">理由: ${prevReason} → ${currReason}</span></div>`;
+        }
+
+        if (rows) {
+            parts.push(`<div class="diff-panel"><div class="diff-panel-name ${key}">${meta.name}</div>${rows}</div>`);
+        }
+    });
+    return parts.join('');
+}
+
+function updateDiffSection(currentPanels, currentConsensus) {
+    const diffSection = document.getElementById('diffSection');
+    const diffBody = document.getElementById('diffBody');
+
+    if (previousPanels && currentPanels) {
+        const html = buildDiffHtml(previousPanels, currentPanels);
+        if (html) {
+            // Add consensus diff
+            let consensusDiff = '';
+            if (previousConsensus && currentConsensus) {
+                const prevOutcome = previousConsensus.outcome?.finalText || '';
+                const currOutcome = currentConsensus.outcome?.finalText || '';
+                if (prevOutcome !== currOutcome) {
+                    consensusDiff = `<div class="diff-panel"><div class="diff-panel-name" style="color:var(--amber)">CONSENSUS</div><div class="diff-row"><span class="diff-changed">最終判定: ${prevOutcome} → ${currOutcome}</span></div></div>`;
+                }
+            }
+            diffBody.innerHTML = html + consensusDiff;
+            diffSection.classList.add('show');
+        } else {
+            diffBody.innerHTML = '<div class="diff-row"><span class="diff-same">前回と同じ結果です。</span></div>';
+            diffSection.classList.add('show');
+        }
+    } else {
+        diffSection.classList.remove('show');
+    }
+
+    previousPanels = currentPanels ? JSON.parse(JSON.stringify(currentPanels)) : null;
+    previousConsensus = currentConsensus ? JSON.parse(JSON.stringify(currentConsensus)) : null;
+}
+
+function showRedeliberateUi() {
+    deliberationCount += 1;
+    const wrap = document.getElementById('redeliberateWrap');
+    const countEl = document.getElementById('redeliberateCount');
+    wrap.classList.add('show');
+    countEl.textContent = `審議回数: ${deliberationCount}`;
+}
+
+function hideRedeliberateUi() {
+    document.getElementById('redeliberateWrap').classList.remove('show');
+    document.getElementById('diffSection').classList.remove('show');
+}
+
+function reDeliberate() {
+    execute();
+}
+
+document.getElementById('templateChips').addEventListener('click', (event) => {
+    const chip = event.target.closest('.template-chip');
+    if (!chip) return;
+    const queryInput = document.getElementById('queryInput');
+    queryInput.value = chip.textContent;
+    clearFieldError('queryInput');
+    queryInput.focus();
+});
 
 document.getElementById('bannerAction').addEventListener('click', () => {
     handleBannerAction(bannerActionType);

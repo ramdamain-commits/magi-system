@@ -1,6 +1,6 @@
 ﻿# MAGI System
 
-MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議させ、重要な判断の blind spot を見つけるための実験的な意思決定 UI です。現在は `DEMO` と `GEMINI` の 2 モードを持ち、無料で遊べる疑似審議と、1 回の Gemini リクエストで返す実AI審議を切り替えられます。合議は UI 側で合成し、ゲーム性を保ったまま読みやすさと API 負荷を両立します。
+MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議させ、重要な判断の blind spot を見つけるための実験的な意思決定 UI です。`DEMO`、`GEMINI`、`LOCAL AI`（実験的）の 3 モードを持ち、無料の疑似審議、1 回の Gemini リクエストで返す実AI審議、ブラウザ内ローカルLLM審議を切り替えられます。再審議ループと差分比較で繰り返し遊べるゲーム性を持ち、合議は UI 側で合成します。
 
 ## 開発目的
 
@@ -31,16 +31,18 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 
 ## 使い方
 
-1. まず `RUN MODE` で `DEMO` か `GEMINI` を選ぶ
+1. まず `RUN MODE` で `DEMO`、`GEMINI`、`LOCAL AI` のいずれかを選ぶ
 2. `GEMINI` を使う場合だけ、[Google AI Studio](https://aistudio.google.com) で取得した API キーを `API KEY` 欄に入力する
-3. 利害が割れそうな問いを入力して `START` を押す
+3. テンプレートチップをクリックするか、利害が割れそうな問いを入力して `START` を押す
 4. 各パネルの `理由 / 最大リスク / 承認条件 / 判定` を見比べる
 5. 最後に `MAJORITY VIEW / MINORITY VIEW / HOLD CONDITIONS / RECOMMENDED ACTION` を読む
+6. `再審議` ボタンで同じ問いを繰り返し実行し、前回との差分を比較できる
 
 ## 実行モード
 
 - `DEMO`: 無料、キー不要。ブラウザ内の疑似審議で、割れ方と UI の流れを試せる
 - `GEMINI`: 実AIモード。1 回の Gemini 呼び出しで 3 人格の審議をまとめて返す
+- `LOCAL AI`（実験的）: 無料、キー不要、WebGPU必須。ブラウザ内で小型LLM（Qwen2.5-3B）を実行する。品質基準を満たせない場合は DEMO に自動フォールバックする
 
 ## UI / エラー方針
 
@@ -49,7 +51,7 @@ MAGI System は、3つの価値観を持つ AI パネルに同じ問いを審議
 - 入力エラーや通信エラーは `alert()` ではなく画面内のバナーと入力欄下の案内で示す
 - `RESET` は問いを消さずに審議だけを中断し、修正して再実行しやすくする
 
-`LOCAL AI` の PoC で得た知見と廃止理由は [docs/HANDOFF.md](docs/HANDOFF.md) の `KPT` に残しています。再挑戦する場合は、そこを起点に進めます。
+`LOCAL AI` は実験的モードとして再導入しています。WebLLM + Qwen2.5-3B で panel 個別生成を行い、品質基準未達時は DEMO に自動フォールバックします。過去の PoC 知見は [docs/HANDOFF.md](docs/HANDOFF.md) の `KPT` に残しています。
 
 ## 開発ファイル
 

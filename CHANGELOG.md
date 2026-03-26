@@ -1,5 +1,29 @@
 ﻿# Changelog
 
+## 2026-03-26
+
+### Changed
+
+- `buildConsensusFromPanels` から `overrides` パラメータを削除し、`panels` のみを正規入力とする契約に整理した
+- `buildValidatedDeliberation` から `payload.consensus` の後方互換分岐を削除した
+- `getPanelSource` から `payload` 直読みのフォールバック（`panels` キーがない場合の互換）を削除した
+- プロンプト指示（`consensus を返さない`）と受信側コードの整合を取った
+
+### Added
+
+- 再審議ボタン: 同じ問いで何度でも審議を実行でき、審議回数を表示する
+- 差分比較: 前回と今回の審議結果（判定、結論、リスク、理由、最終判定）の変化を表示する
+- 良い問いテンプレ導線: 衝突しやすい入力例 8 件をクリック可能なチップとして UI に統合した
+- `LOCAL AI` 実験モード: WebLLM + Qwen2.5-3B で panel 個別生成を行う実験的モードを追加した
+- `LOCAL AI` の品質基準未達時に `DEMO` モードへ自動フォールバックする導線を組み込んだ
+- `LOCAL AI` のモデルダウンロード進捗バーと WebGPU 非対応時のエラー案内を追加した
+
+### Notes
+
+- `LOCAL AI` は「実験的」ラベル付きで提供し、安定基準（代表質問 5 件で安定成功 + 日本語で最低限読める）を満たすまでは fallback 前提の運用とする
+- 再審議・差分比較は `UPDATE_POLICY.md` の 7 番「ゲーム性を高める方針」に基づく実装
+- `panels only` 契約整理により、API が `consensus` を返しても UI は無視し `panels` だけで表示を成立させる設計になった
+
 ## 2026-03-25
 
 ### Removed

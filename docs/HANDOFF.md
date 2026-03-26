@@ -1,15 +1,17 @@
 ﻿# MAGI System Handoff
 
-最終更新: 2026-03-25
+最終更新: 2026-03-26
 
 ## 1. 現在地
 
 - 現行アプリは `index.html` の単一ファイル構成
-- `RUN MODE` は `DEMO` と `GEMINI` の 2 モード
+- `RUN MODE` は `DEMO`、`GEMINI`、`LOCAL AI`（実験的）の 3 モード
 - `DEMO` はブラウザ内の疑似審議で、API キーなしの無料体験用
 - `GEMINI` は API を 1 回だけ呼び、モデルには `panels` を返させて合議は UI 側でローカル合成する
+- `LOCAL AI` は WebLLM + Qwen2.5-3B で panel 個別生成を行う実験的モード。品質基準未達時は `DEMO` へ自動フォールバックする
 - 入力ミスと通信失敗は `alert()` ではなく、画面上部バナーと inline エラーで案内する
-- `LOCAL AI` は PoC の実機 QA で安定基準を満たせず、ユーザー向けモードから外した
+- 再審議ボタンと差分比較機能で、同じ問いを繰り返し審議してゲーム性を高められる
+- 良い問いテンプレ 8 件をクリック可能なチップとして UI に統合した
 - GitHub Pages 公開先は削除済み（旧 URL: `https://ramdamain-commits.github.io/test-project/`）
 - 文字コード運用は `.editorconfig` が source of truth。PR では `.github/workflows/text-encoding-check.yml` が `scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning` を実行する
 
@@ -33,19 +35,23 @@
 
 - `DEMO` は API を使わず、割れ方と UI フローを試すための疑似審議
 - `GEMINI` は external call を原則 1 回に制限し、structured output で JSON を返させる
+- `LOCAL AI` は WebLLM でブラウザ内推論を行う実験的モード。panel 個別生成 + 品質スコアリング + 自動フォールバック
 - `RESET` では `AbortController` で Gemini リクエストを中断し、質問文は残す
-- 失敗系は `TRUNCATED / FORMAT / EMPTY / SAFETY / QUOTA / RATE LIMIT / AUTH / REQUEST / NETWORK` を大別し、画面内で案内する
+- 失敗系は `TRUNCATED / FORMAT / EMPTY / SAFETY / QUOTA / RATE LIMIT / AUTH / REQUEST / NETWORK / WEBGPU / LOCAL_INIT / LOW_QUALITY` を大別し、画面内で案内する
 
 ## 3. コード上の重要ポイント
 
 - `HOW TO PLAY` と `RUN MODE` の UI は `index.html` の `quickstart` と `setup-wrap`
 - モード定義、schema、人格定義は `RUN_MODE_META`、`MAGI_RESPONSE_SCHEMA`、`MAGI`
 - `panels only` の指示は `buildSingleMagiPrompt()`
-- JSON 抽出は `extractJsonPayload()` と `buildValidatedDeliberation()`
-- 合議のローカル合成は `buildConsensusFromPanels()`
+- JSON 抽出は `extractJsonPayload()` と `buildValidatedDeliberation()`（consensus 互換分岐は削除済み）
+- 合議のローカル合成は `buildConsensusFromPanels(panels, voteSummaryOverride)`（overrides 廃止、panels のみ正規入力）
 - `DEMO` の疑似審議生成は `buildDemoDeliberation()`
 - Gemini 呼び出しは `callGeminiOnce()`
-- エラー分類は `classifyError()`
+- LOCAL AI のエンジン管理は `ensureLocalEngine()`、panel 生成は `callLocalPanel()`、統合は `executeLocalAi()`
+- 品質スコアリングは `scoreLocalPanelQuality()`（日本語含有を含む 5 点満点、閾値 3）
+- 再審議と差分比較は `reDeliberate()`、`updateDiffSection()`、`buildDiffHtml()`
+- エラー分類は `classifyError()`（LOCAL AI 系エラーコード追加済み）
 - 実行フローと `RESET` は `execute()` と `resetAll()`
 
 ## 4. KPT
@@ -72,12 +78,13 @@
 
 ## 5. 既知の論点
 
-1. `panels only` 契約の整理
-   プロンプトでは `consensus を返さない` としているが、受信側ではまだ `payload.consensus` を読む後方互換分岐が残っている。`panels` だけで成立する形へ寄せる余地がある
-2. ゲーム性の本命機能が未着手
-   `再審議ループ`、差分比較、良い問いテンプレ導線はまだ未実装
-3. `LOCAL AI` 再挑戦の優先度は低い
-   再着手するなら、現行 UI へ戻す前に PoC と QA 条件を先に置く
+1. ~~`panels only` 契約の整理~~ → **完了**（2026-03-26）。consensus 互換分岐を削除し、panels のみ正規入力とした
+2. ~~ゲーム性の本命機能が未着手~~ → **完了**（2026-03-26）。再審議ループ、差分比較、良い問いテンプレ導線を実装した
+3. ~~`LOCAL AI` 再挑戦~~ → **実験的モードとして再導入**（2026-03-26）。WebLLM + Qwen2.5-3B で panel 個別生成 + 品質スコアリング + DEMO フォールバック。安定基準（代表質問 5 件で安定成功）は未検証
+4. `LOCAL AI` の実機 QA が未実施
+   WebLLM のモデルダウンロードと推論が実際の環境で動作するか、代表質問での品質を検証する必要がある
+5. テンプレートの問い 8 件の妥当性検証
+   現在の 8 件が実際に衝突を引き出せるか、DEMO / GEMINI で確認する余地がある
 
 ## 6. 実 API QA の最小セット
 
@@ -113,6 +120,7 @@ git status --short --branch
 
 ## 8. 直近の履歴（GitHub repo 削除済み - PR リンクはアーカイブ参照）
 
+- 2026-03-26: `panels only` 契約整理（consensus 互換分岐削除）、ゲーム性強化（再審議・差分比較・テンプレチップ）、LOCAL AI 実験モード再導入を実装した
 - 2026-03-25: WebLLM を使う `LOCAL AI` の PoC を試し、実機 QA で `finishReason:length` と低品質応答の傾向を確認した
 - 2026-03-25: `LOCAL AI` をユーザー向けモードから外し、知見をこの文書の `KPT` に集約した
 - 2026-03-24: `DEMO` / `GEMINI` の 2 モード化、初回導線の再配置、画面内バナーと inline エラーを追加
@@ -125,6 +133,7 @@ git status --short --branch
 ## 9. 次スレッドの最初に伝えると早いこと
 
 - `docs/HANDOFF.md` を前提に会話を始めること
-- `LOCAL AI` は UI から外しているが、PoC の知見は `KPT` に残っていると最初に共有すると早い
-- もし次が実装スレッドなら、「まず `panels only` 契約整理かゲーム性の強化から」と明示するとブレにくい
+- `panels only` 契約整理とゲーム性強化は完了済み。次は LOCAL AI の実機 QA が最優先
+- `LOCAL AI` は実験的モードとして UI に戻っているが、代表質問 5 件での安定成功は未検証
+- WebLLM のモデルダウンロードと CDN 接続が実環境で動くか確認する必要がある
 - 実 API を流す場合は free tier の quota にすぐ当たるので、テスト回数を絞ること
