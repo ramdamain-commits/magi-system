@@ -1,6 +1,6 @@
 ﻿# MAGI System Handoff
 
-最終更新: 2026-03-26
+最終更新: 2026-03-29
 
 ## 1. 現在地
 
@@ -46,7 +46,7 @@
 - `panels only` の指示は `buildSingleMagiPrompt()`
 - JSON 抽出は `extractJsonPayload()` と `buildValidatedDeliberation()`（consensus 互換分岐は削除済み）
 - 合議のローカル合成は `buildConsensusFromPanels(panels, voteSummaryOverride)`（overrides 廃止、panels のみ正規入力）
-- `DEMO` の疑似審議生成は `buildDemoDeliberation()`
+- `DEMO` の疑似審議生成は `buildDemoDeliberation()`（`deliberationCount` を seed に含め、再審議で結果が変化する）
 - Gemini 呼び出しは `callGeminiOnce()`
 - LOCAL AI のエンジン管理は `ensureLocalEngine()`、panel 生成は `callLocalPanel()`、統合は `executeLocalAi()`
 - 品質スコアリングは `scoreLocalPanelQuality()`（日本語含有を含む 5 点満点、閾値 3）
@@ -81,10 +81,9 @@
 1. ~~`panels only` 契約の整理~~ → **完了**（2026-03-26）。consensus 互換分岐を削除し、panels のみ正規入力とした
 2. ~~ゲーム性の本命機能が未着手~~ → **完了**（2026-03-26）。再審議ループ、差分比較、良い問いテンプレ導線を実装した
 3. ~~`LOCAL AI` 再挑戦~~ → **実験的モードとして再導入**（2026-03-26）。WebLLM + Qwen2.5-3B で panel 個別生成 + 品質スコアリング + DEMO フォールバック。安定基準（代表質問 5 件で安定成功）は未検証
-4. `LOCAL AI` の実機 QA が未実施
-   WebLLM のモデルダウンロードと推論が実際の環境で動作するか、代表質問での品質を検証する必要がある
-5. テンプレートの問い 8 件の妥当性検証
-   現在の 8 件が実際に衝突を引き出せるか、DEMO / GEMINI で確認する余地がある
+4. ~~`LOCAL AI` の実機 QA~~ → **フォールバック動作確認済み**（2026-03-29）。WebGPU 非対応環境で CDN 接続失敗 → DEMO フォールバックが正常動作。WebGPU 対応環境での推論品質は未検証
+5. ~~テンプレートの問い 8 件の妥当性検証~~ → **改善済み**（2026-03-29）。キーワードルール調整とテンプレート拡充により、8 問中 6 問が 2A/1R、2 問が 1A/2R と多様な割れ方になった。再審議時の結果変化も確認済み
+6. ~~Gemini API 無料枠テスト~~ → **確認済み**（2026-03-29）。代表質問 1 問で 3 パネル表示、少数意見残存、投票と判定の整合を確認した
 
 ## 6. 実 API QA の最小セット
 
@@ -120,6 +119,7 @@ git status --short --branch
 
 ## 8. 直近の履歴（GitHub repo 削除済み - PR リンクはアーカイブ参照）
 
+- 2026-03-29: DEMO キーワードルール調整・テンプレート拡充（3→5件）・再審議バリエーション追加。LOCAL AI フォールバック動作確認。Gemini API 実機テスト成功
 - 2026-03-26: `panels only` 契約整理（consensus 互換分岐削除）、ゲーム性強化（再審議・差分比較・テンプレチップ）、LOCAL AI 実験モード再導入を実装した
 - 2026-03-25: WebLLM を使う `LOCAL AI` の PoC を試し、実機 QA で `finishReason:length` と低品質応答の傾向を確認した
 - 2026-03-25: `LOCAL AI` をユーザー向けモードから外し、知見をこの文書の `KPT` に集約した
@@ -133,7 +133,7 @@ git status --short --branch
 ## 9. 次スレッドの最初に伝えると早いこと
 
 - `docs/HANDOFF.md` を前提に会話を始めること
-- `panels only` 契約整理とゲーム性強化は完了済み。次は LOCAL AI の実機 QA が最優先
-- `LOCAL AI` は実験的モードとして UI に戻っているが、代表質問 5 件での安定成功は未検証
-- WebLLM のモデルダウンロードと CDN 接続が実環境で動くか確認する必要がある
+- DEMO のキーワードルール・テンプレート改善、LOCAL AI フォールバック確認、Gemini API テストは完了済み
+- `LOCAL AI` は WebGPU 非対応環境でのフォールバック動作は確認済みだが、WebGPU 対応環境での推論品質は未検証
 - 実 API を流す場合は free tier の quota にすぐ当たるので、テスト回数を絞ること
+- GitHub Pages の公開先は削除済み。再公開する場合は新しい repo を用意する必要がある

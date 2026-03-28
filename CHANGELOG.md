@@ -1,5 +1,24 @@
 ﻿# Changelog
 
+## 2026-03-29
+
+### Changed
+
+- `DEMO_SIGNAL_RULES` を調整し、テンプレ 8 問で 2A/1R と 1A/2R の両パターンが出るようにした
+  - BALTHASAR の `negative` から汎用的すぎる `'ai'` を除外し、`positive` に `'アイデア'`, `'一次'`, `'スクリーニング'` を追加
+  - CASPAR の `positive` に `'対策'`, `'スクリーニング'` を追加、`negative` から `'医療'`, `'炎上'` を除外
+  - MELCHIOR の `positive` に `'導入'`, `'管理'`, `'出席'` を追加、`negative` から `'自動化'` を除外
+- `DEMO_LIBRARY` の各パネル approve/reject テンプレートを 3 → 5 件に拡充し、応答バリエーションを増やした
+- `scoreDemoPanel`, `createDemoPanel`, `rebalanceDemoPanels`, `buildDemoDeliberation` に `round`（審議回数）を渡すようにし、再審議時にスコアとテンプレート選択が変化するようにした
+- `scoreDemoPanel` の drift 係数を 0.9 → 1.2 に引き上げ、キーワードヒット差が小さい質問で結果が揺れやすくした
+
+### Verified
+
+- LOCAL AI: WebGPU 非対応環境で CDN 接続失敗 → DEMO フォールバックが正常に動作することを確認した
+- DEMO: テンプレ 8 問中 6 問が 2A/1R、2 問が 1A/2R と割れ、改善前の全問 1A/2R から多様性が向上した
+- DEMO: 再審議で同じ質問でも verdict が変化する（例: round 0→1A/2R, round 2→2A/1R）ことを確認した
+- GEMINI: API キーを使った実審議で 3 パネル表示、少数意見残存、投票と判定の整合を確認した
+
 ## 2026-03-26
 
 ### Changed

@@ -1300,16 +1300,16 @@ const verdicts = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const panelStates = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const DEMO_SIGNAL_RULES = {
     b: {
-        positive: ['試験', '限定', '段階', '小規模', '検証', '撤退', '仮説', '実験', 'poc', '比較'],
-        negative: ['ai', '生成ai', '自動化', '効率化', '最適化', '監視', '全面', '全社', '置き換え', '炎上']
+        positive: ['試験', '限定', '段階', '小規模', '検証', '撤退', '仮説', '実験', 'poc', '比較', 'アイデア', '一次', 'スクリーニング'],
+        negative: ['全面', '全社', '置き換え', '常設', '完全', '本番', '自動化', '効率化']
     },
     c: {
-        positive: ['同意', '匿名', '監査', '説明', '救済', '記録', '保護', '人手確認', '相談窓口', 'オプトアウト'],
-        negative: ['監視', '顔認証', '採用', '評価', '解雇', '医療', '個人情報', '位置情報', '未成年', '子ども', '差別', '炎上']
+        positive: ['同意', '匿名', '監査', '説明', '救済', '記録', '保護', '人手確認', '相談窓口', 'オプトアウト', '対策', 'スクリーニング'],
+        negative: ['監視', '顔認証', '採用', '評価', '解雇', '個人情報', '位置情報', '未成年', '子ども', '差別']
     },
     m: {
-        positive: ['試験', '限定', '段階', '担当', '責任者', 'kpi', '検証', '予算', '撤退', 'ログ', '運用'],
-        negative: ['全面', '全社', '自動化', '即時', '即日', '置き換え', '本番', '24時間', '無人', '完全', '常設']
+        positive: ['試験', '限定', '段階', '担当', '責任者', 'kpi', '検証', '予算', '撤退', 'ログ', '運用', '導入', '管理', '出席'],
+        negative: ['全面', '全社', '即時', '即日', '置き換え', '24時間', '無人', '完全', '常設', '公開']
     }
 };
 const DEMO_LIBRARY = {
@@ -1317,36 +1317,48 @@ const DEMO_LIBRARY = {
         approve: [
             { conclusion: '小さく試す価値', reason: '常識を崩す余地がある', risk: '演出先行で空転する', condition: '失敗時に即撤退' },
             { conclusion: '前提検証なら可', reason: '惰性判断を揺らせる', risk: '流行語で誤魔化す', condition: '比較対象を残す' },
-            { conclusion: '限定公開で可', reason: '反対論点を炙れる', risk: '期待だけ先行する', condition: '数字で見切る' }
+            { conclusion: '限定公開で可', reason: '反対論点を炙れる', risk: '期待だけ先行する', condition: '数字で見切る' },
+            { conclusion: '逆説的に賛成', reason: '失敗データこそ価値がある', risk: '成功体験に変換される', condition: '失敗記録を必ず残す' },
+            { conclusion: '仮説検証に使える', reason: '思い込みを数値で壊せる', risk: '検証と称して既成事実化', condition: '期限と判定基準を先に決める' }
         ],
         reject: [
             { conclusion: '流行語先行で危険', reason: '便利さで思考停止する', risk: '元に戻せず常態化', condition: '対象と期間を限定' },
             { conclusion: '空気に流されすぎ', reason: '誰が得するか曖昧', risk: '失敗しても止まらない', condition: '撤退条件を先に置く' },
-            { conclusion: '逆張りでも否決', reason: '新規性より惰性が強い', risk: '看板だけ残って腐る', condition: '本当に変える一点を絞る' }
+            { conclusion: '逆張りでも否決', reason: '新規性より惰性が強い', risk: '看板だけ残って腐る', condition: '本当に変える一点を絞る' },
+            { conclusion: '問い自体が甘い', reason: '前提を疑わず手段に飛んでいる', risk: '解決すべき問題がすり替わる', condition: '目的を再定義してから再提出' },
+            { conclusion: '権威への依存が強い', reason: '技術があるから正しいという飛躍', risk: '判断の外注が常態化する', condition: '人間が最終判断する設計に' }
         ]
     },
     c: {
         approve: [
             { conclusion: '保護策次第で可', reason: '被害を減らす余地がある', risk: '弱い側に説明負荷', condition: '救済線を先に置く' },
             { conclusion: '限定条件で可', reason: '被害監視を先置きできる', risk: '想定外の悪用が出る', condition: '人手確認を残す' },
-            { conclusion: '監査付きなら可', reason: '抑止策を組み込める', risk: '同意が形骸化する', condition: '拒否導線を明示' }
+            { conclusion: '監査付きなら可', reason: '抑止策を組み込める', risk: '同意が形骸化する', condition: '拒否導線を明示' },
+            { conclusion: '透明性があれば可', reason: '判断過程を追跡できる', risk: '形式的な開示で終わる', condition: '異議申立ての窓口を設置' },
+            { conclusion: '段階的なら許容', reason: '被害の早期発見が可能', risk: '慣れで警戒心が薄れる', condition: '定期的な影響評価を義務化' }
         ],
         reject: [
             { conclusion: '被害の火種が大きい', reason: '弱い側へ負荷が寄る', risk: '差別や炎上を増幅', condition: '救済策を先に設計' },
             { conclusion: '説明責任に耐えない', reason: '本人不在で進みやすい', risk: '権利侵害が固定化', condition: '同意と監査を明文化' },
-            { conclusion: '守りが薄すぎる', reason: '悪用時の歯止めが弱い', risk: '見えない被害が蓄積', condition: '例外対応を先に置く' }
+            { conclusion: '守りが薄すぎる', reason: '悪用時の歯止めが弱い', risk: '見えない被害が蓄積', condition: '例外対応を先に置く' },
+            { conclusion: '同意の質が低い', reason: '拒否の選択肢が実質ない', risk: '弱者が声を上げられない', condition: 'オプトアウトを実効化' },
+            { conclusion: '影響範囲が読めない', reason: '二次被害の想定が甘い', risk: '取り返しのつかない段階で発覚', condition: '影響範囲の事前シミュレーション' }
         ]
     },
     m: {
         approve: [
             { conclusion: '段階導入なら可', reason: '運用を切り分けられる', risk: '責任分界が曖昧', condition: '担当者と停止条件を固定' },
             { conclusion: '試験運用で可', reason: '現場負荷を測りやすい', risk: 'KPI不在で長引く', condition: '計測項目を先に決める' },
-            { conclusion: '小規模検証なら可', reason: '撤退線を引きやすい', risk: '保守運用が膨らむ', condition: 'ログと監査を残す' }
+            { conclusion: '小規模検証なら可', reason: '撤退線を引きやすい', risk: '保守運用が膨らむ', condition: 'ログと監査を残す' },
+            { conclusion: '既存業務の延長で可', reason: '現場の受入コストが低い', risk: '改善効果が見えにくい', condition: 'before/afterを定量比較' },
+            { conclusion: '予算内なら可', reason: 'コスト見積もりが現実的', risk: '隠れ運用コストが後から出る', condition: '半年後の再評価を予約' }
         ],
         reject: [
             { conclusion: '運用責任が重すぎる', reason: '現場にしわ寄せが出る', risk: '止め時を失う', condition: 'KPIと撤退線を置く' },
             { conclusion: '本番投入は早い', reason: '担当者が見えない', risk: '障害時の責任が散る', condition: '責任者を固定する' },
-            { conclusion: '段取り不足で否決', reason: '維持コストを甘く見ている', risk: '運用が属人化する', condition: '手順と監査を先に作る' }
+            { conclusion: '段取り不足で否決', reason: '維持コストを甘く見ている', risk: '運用が属人化する', condition: '手順と監査を先に作る' },
+            { conclusion: '現場が回らない', reason: '導入後の教育が計画にない', risk: '形骸化して放置される', condition: '教育計画と工数を先に確保' },
+            { conclusion: '撤退設計がない', reason: '止める手順が決まっていない', risk: 'サンクコストで続けてしまう', condition: '撤退判定日を事前に設定' }
         ]
     }
 };
@@ -1851,17 +1863,18 @@ function buildValidatedDeliberation(rawText, responseMeta = null) {
     };
 }
 
-function scoreDemoPanel(query, key) {
+function scoreDemoPanel(query, key, round) {
     const normalized = cleanLine(query).toLowerCase();
-    const drift = ((hashText(`${normalized}:${key}`) % 100) / 100) - 0.5;
+    const seed = `${normalized}:${key}:${round}`;
+    const drift = ((hashText(seed) % 100) / 100) - 0.5;
     const rules = DEMO_SIGNAL_RULES[key];
     return (keywordHits(normalized, rules.positive) * 0.95)
         - (keywordHits(normalized, rules.negative) * 1.05)
-        + (drift * 0.9);
+        + (drift * 1.2);
 }
 
-function createDemoPanel(query, meta, verdict) {
-    const template = pickSeeded(DEMO_LIBRARY[meta.key][verdict], `${query}:${meta.key}:${verdict}`);
+function createDemoPanel(query, meta, verdict, round) {
+    const template = pickSeeded(DEMO_LIBRARY[meta.key][verdict], `${query}:${meta.key}:${verdict}:${round}`);
     return {
         name: meta.name,
         badge: meta.badge,
@@ -1873,7 +1886,7 @@ function createDemoPanel(query, meta, verdict) {
     };
 }
 
-function rebalanceDemoPanels(query, panels, scores) {
+function rebalanceDemoPanels(query, panels, scores, round) {
     const approveCount = PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length;
     const rejectCount = PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length;
     if (approveCount && rejectCount) return;
@@ -1885,16 +1898,17 @@ function rebalanceDemoPanels(query, panels, scores) {
     const [key] = candidate;
     const meta = PANEL_META[key];
     const flippedVerdict = panels[key].verdict === 'approve' ? 'reject' : 'approve';
-    panels[key] = createDemoPanel(query, meta, flippedVerdict);
+    panels[key] = createDemoPanel(query, meta, flippedVerdict, round);
 }
 
 function buildDemoDeliberation(query) {
-    const scores = Object.fromEntries(MAGI.map(meta => [meta.key, scoreDemoPanel(query, meta.key)]));
+    const round = deliberationCount;
+    const scores = Object.fromEntries(MAGI.map(meta => [meta.key, scoreDemoPanel(query, meta.key, round)]));
     const panels = Object.fromEntries(MAGI.map(meta => {
         const verdict = scores[meta.key] >= 0 ? 'approve' : 'reject';
-        return [meta.key, createDemoPanel(query, meta, verdict)];
+        return [meta.key, createDemoPanel(query, meta, verdict, round)];
     }));
-    rebalanceDemoPanels(query, panels, scores);
+    rebalanceDemoPanels(query, panels, scores, round);
     const demoVoteSummary = `DEMO ${PANEL_KEYS.filter(key => panels[key].verdict === 'approve').length} approve / ${PANEL_KEYS.filter(key => panels[key].verdict === 'reject').length} reject`;
     return {
         panels,
