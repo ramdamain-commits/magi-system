@@ -12,7 +12,8 @@
 - 入力ミスと通信失敗は `alert()` ではなく、画面上部バナーと inline エラーで案内する
 - 再審議ボタンと差分比較機能で、同じ問いを繰り返し審議してゲーム性を高められる
 - 良い問いテンプレ 8 件をクリック可能なチップとして UI に統合した
-- GitHub Pages 公開先は削除済み（旧 URL: `https://ramdamain-commits.github.io/test-project/`）
+- 現行の公開先: `https://ramdamain-commits.github.io/magi-system/`
+- 旧公開先（旧 repo `test-project`）は削除済み（旧 URL: `https://ramdamain-commits.github.io/test-project/`）
 - 文字コード運用は `.editorconfig` が source of truth。PR では `.github/workflows/text-encoding-check.yml` が `scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning` を実行する
 
 ## 2. いまの仕様の要点
@@ -114,10 +115,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-TextEncoding.
 git status --short --branch
 
 # 公開サイト
-# GitHub repo 削除済み - 公開サイトなし
+# 現行公開先: https://ramdamain-commits.github.io/magi-system/
+# 旧公開先（旧 repo test-project）は削除済み
 ```
 
-## 8. 直近の履歴（GitHub repo 削除済み - PR リンクはアーカイブ参照）
+## 8. 直近の履歴（旧 repo `test-project` 削除済み - 旧 PR リンクはアーカイブ参照）
 
 - 2026-03-29: DEMO キーワードルール調整・テンプレート拡充（3→5件）・再審議バリエーション追加。LOCAL AI フォールバック動作確認。Gemini API 実機テスト成功
 - 2026-03-26: `panels only` 契約整理（consensus 互換分岐削除）、ゲーム性強化（再審議・差分比較・テンプレチップ）、LOCAL AI 実験モード再導入を実装した
@@ -136,4 +138,4 @@ git status --short --branch
 - DEMO のキーワードルール・テンプレート改善、LOCAL AI フォールバック確認、Gemini API テストは完了済み
 - `LOCAL AI` は WebGPU 非対応環境でのフォールバック動作は確認済みだが、WebGPU 対応環境での推論品質は未検証
 - 実 API を流す場合は free tier の quota にすぐ当たるので、テスト回数を絞ること
-- GitHub Pages の公開先は削除済み。再公開する場合は新しい repo を用意する必要がある
+- 現行の公開先は `https://ramdamain-commits.github.io/magi-system/`。旧公開先（旧 repo `test-project`）は削除済み
