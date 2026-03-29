@@ -1108,7 +1108,7 @@
 
 <!-- Consensus -->
 <div class="consensus" id="consensus">
-    <div class="cs-label">▶▶ MAGI CONSENSUS RESULT ◀◀</div>
+    <div class="cs-label" id="csLabel">▶▶ MAGI CONSENSUS RESULT ◀◀</div>
     <div class="vote-row" id="voteRow"></div>
     <div class="fv" id="finalVerdict"></div>
     <div class="fd" id="finalDesc"></div>
@@ -1300,16 +1300,16 @@ const verdicts = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const panelStates = Object.fromEntries(PANEL_KEYS.map(key => [key, null]));
 const DEMO_SIGNAL_RULES = {
     b: {
-        positive: ['試験', '限定', '段階', '小規模', '検証', '撤退', '仮説', '実験', 'poc', '比較', 'アイデア', '一次', 'スクリーニング'],
-        negative: ['全面', '全社', '置き換え', '常設', '完全', '本番', '自動化', '効率化']
+        positive: ['試験', '限定', '段階', '小規模', '検証', '撤退', '仮説', '実験', 'poc', '比較', 'アイデア', '一次', 'スクリーニング', 'プロトタイプ', '逆張り', '少数派', '反証', '代替案'],
+        negative: ['全面', '全社', '置き換え', '常設', '完全', '本番', '自動化', '効率化', '業界標準', 'ベストプラクティス', '前例', '大手', '実績']
     },
     c: {
-        positive: ['同意', '匿名', '監査', '説明', '救済', '記録', '保護', '人手確認', '相談窓口', 'オプトアウト', '対策', 'スクリーニング'],
-        negative: ['監視', '顔認証', '採用', '評価', '解雇', '個人情報', '位置情報', '未成年', '子ども', '差別']
+        positive: ['同意', '匿名', '監査', '説明', '救済', '記録', '保護', '人手確認', '相談窓口', 'オプトアウト', '対策', 'スクリーニング', '透明性', '第三者', '被害者', '教育', '情報開示'],
+        negative: ['監視', '顔認証', '採用', '評価', '解雇', '個人情報', '位置情報', '未成年', '子ども', '差別', 'プロファイリング', 'スコアリング', '追跡', '生体', '高齢者']
     },
     m: {
-        positive: ['試験', '限定', '段階', '担当', '責任者', 'kpi', '検証', '予算', '撤退', 'ログ', '運用', '導入', '管理', '出席'],
-        negative: ['全面', '全社', '即時', '即日', '置き換え', '24時間', '無人', '完全', '常設', '公開']
+        positive: ['試験', '限定', '段階', '担当', '責任者', 'kpi', '検証', '予算', '撤退', 'ログ', '運用', '導入', '管理', '出席', 'マニュアル', '引き継ぎ', 'roi', '自動テスト', '監視'],
+        negative: ['全面', '全社', '即時', '即日', '置き換え', '24時間', '無人', '完全', '常設', '公開', '属人', '手動', '兼務', '残業', '暫定']
     }
 };
 const DEMO_LIBRARY = {
@@ -1319,14 +1319,24 @@ const DEMO_LIBRARY = {
             { conclusion: '前提検証なら可', reason: '惰性判断を揺らせる', risk: '流行語で誤魔化す', condition: '比較対象を残す' },
             { conclusion: '限定公開で可', reason: '反対論点を炙れる', risk: '期待だけ先行する', condition: '数字で見切る' },
             { conclusion: '逆説的に賛成', reason: '失敗データこそ価値がある', risk: '成功体験に変換される', condition: '失敗記録を必ず残す' },
-            { conclusion: '仮説検証に使える', reason: '思い込みを数値で壊せる', risk: '検証と称して既成事実化', condition: '期限と判定基準を先に決める' }
+            { conclusion: '仮説検証に使える', reason: '思い込みを数値で壊せる', risk: '検証と称して既成事実化', condition: '期限と判定基準を先に決める' },
+            { conclusion: '試す価値がある', reason: '既存の延長にない視点が入っている', risk: 'プロトタイプが目的化する', condition: '仮説と検証指標を先に書く' },
+            { conclusion: '少数派として支持', reason: '多数決に埋もれる論点を掘れる', risk: '少数意見の暴走を招く', condition: '反対論と同時に記録する' },
+            { conclusion: '反証込みで賛成', reason: '崩れる前提を先に炙り出せる', risk: '反証が形骸化する', condition: '崩した前提の代替を示す' },
+            { conclusion: '代替案として可', reason: '本流より尖っているが着地できる', risk: '代替が本流より複雑になる', condition: '本流との差分を一行で書く' },
+            { conclusion: '逆張りで賛成', reason: '常識の裏側に盲点がある', risk: '奇抜さが一人歩きする', condition: '奇抜さより根拠を先に立てる' }
         ],
         reject: [
             { conclusion: '流行語先行で危険', reason: '便利さで思考停止する', risk: '元に戻せず常態化', condition: '対象と期間を限定' },
             { conclusion: '空気に流されすぎ', reason: '誰が得するか曖昧', risk: '失敗しても止まらない', condition: '撤退条件を先に置く' },
             { conclusion: '逆張りでも否決', reason: '新規性より惰性が強い', risk: '看板だけ残って腐る', condition: '本当に変える一点を絞る' },
             { conclusion: '問い自体が甘い', reason: '前提を疑わず手段に飛んでいる', risk: '解決すべき問題がすり替わる', condition: '目的を再定義してから再提出' },
-            { conclusion: '権威への依存が強い', reason: '技術があるから正しいという飛躍', risk: '判断の外注が常態化する', condition: '人間が最終判断する設計に' }
+            { conclusion: '権威への依存が強い', reason: '技術があるから正しいという飛躍', risk: '判断の外注が常態化する', condition: '人間が最終判断する設計に' },
+            { conclusion: '業界標準に逃げている', reason: '前例を根拠に思考を止めている', risk: '環境変化で前例が無効化する', condition: '前例が今も有効か検証する' },
+            { conclusion: '大手依存で否決', reason: 'ブランドが判断を代替している', risk: '信頼を買うだけで中身が空になる', condition: '自前の判断基準を先に持つ' },
+            { conclusion: '実績頼みで危うい', reason: '過去の成功が今回に適用できない', risk: '成功体験が変化への抵抗になる', condition: '今回固有の条件を洗い出す' },
+            { conclusion: 'ベストプラクティス盲信', reason: '文脈を外れた正解を持ち込んでいる', risk: '形式だけ守って本質が抜ける', condition: '自分たちの文脈に当てはめ直す' },
+            { conclusion: '前例踏襲で否決', reason: '変えない理由が惰性しかない', risk: '前例維持コストが積み上がる', condition: '前例を続けるコストを可視化する' }
         ]
     },
     c: {
@@ -1335,14 +1345,24 @@ const DEMO_LIBRARY = {
             { conclusion: '限定条件で可', reason: '被害監視を先置きできる', risk: '想定外の悪用が出る', condition: '人手確認を残す' },
             { conclusion: '監査付きなら可', reason: '抑止策を組み込める', risk: '同意が形骸化する', condition: '拒否導線を明示' },
             { conclusion: '透明性があれば可', reason: '判断過程を追跡できる', risk: '形式的な開示で終わる', condition: '異議申立ての窓口を設置' },
-            { conclusion: '段階的なら許容', reason: '被害の早期発見が可能', risk: '慣れで警戒心が薄れる', condition: '定期的な影響評価を義務化' }
+            { conclusion: '段階的なら許容', reason: '被害の早期発見が可能', risk: '慣れで警戒心が薄れる', condition: '定期的な影響評価を義務化' },
+            { conclusion: '匿名化前提で可', reason: '個人を特定できない設計なら許容範囲', risk: '再識別リスクが残る', condition: '匿名化の技術仕様を先に確認' },
+            { conclusion: '影響範囲が狭い', reason: '対象が限定的で飛び火リスクが低い', risk: '範囲が後から広がる', condition: '範囲拡大には再審議を義務化' },
+            { conclusion: '第三者監査で可', reason: '外部の目が内部の怠慢を防げる', risk: '監査が形式だけになる', condition: '監査結果を公開する設計に' },
+            { conclusion: '情報開示があれば可', reason: '利用者が判断できる状態になっている', risk: '開示内容が専門家にしか読めない', condition: '平易な言葉で要約を出す' },
+            { conclusion: '教育目的なら可', reason: '学習者の利益が明確で悪用経路が薄い', risk: '教育名目の収集が後から転用される', condition: '目的外利用の禁止を明文化' }
         ],
         reject: [
             { conclusion: '被害の火種が大きい', reason: '弱い側へ負荷が寄る', risk: '差別や炎上を増幅', condition: '救済策を先に設計' },
             { conclusion: '説明責任に耐えない', reason: '本人不在で進みやすい', risk: '権利侵害が固定化', condition: '同意と監査を明文化' },
             { conclusion: '守りが薄すぎる', reason: '悪用時の歯止めが弱い', risk: '見えない被害が蓄積', condition: '例外対応を先に置く' },
             { conclusion: '同意の質が低い', reason: '拒否の選択肢が実質ない', risk: '弱者が声を上げられない', condition: 'オプトアウトを実効化' },
-            { conclusion: '影響範囲が読めない', reason: '二次被害の想定が甘い', risk: '取り返しのつかない段階で発覚', condition: '影響範囲の事前シミュレーション' }
+            { conclusion: '影響範囲が読めない', reason: '二次被害の想定が甘い', risk: '取り返しのつかない段階で発覚', condition: '影響範囲の事前シミュレーション' },
+            { conclusion: '高齢者リスクが重い', reason: 'デジタル格差で被害が見えにくくなる', risk: '声を上げられない層が取り残される', condition: '非デジタル窓口を並走させる' },
+            { conclusion: 'プロファイリング懸念', reason: '蓄積データが差別的判断に転用される', risk: '運用者交代で用途が変わる', condition: 'データ利用目的を登記レベルで固定' },
+            { conclusion: '追跡設計は認めない', reason: '行動ログが権力に使われる経路がある', risk: '「安全のため」が免罪符になる', condition: '収集停止と削除の手順を先に用意' },
+            { conclusion: '生体情報は不可逆', reason: 'パスワードと違い変更できない', risk: '漏洩した場合の救済手段がない', condition: '生体以外の代替手段を先に検討' },
+            { conclusion: 'スコアリングは否決', reason: '数値が一人歩きして文脈が消える', risk: '低スコアへの不利益が固定化する', condition: 'スコアの異議申立て経路を設計' }
         ]
     },
     m: {
@@ -1351,14 +1371,24 @@ const DEMO_LIBRARY = {
             { conclusion: '試験運用で可', reason: '現場負荷を測りやすい', risk: 'KPI不在で長引く', condition: '計測項目を先に決める' },
             { conclusion: '小規模検証なら可', reason: '撤退線を引きやすい', risk: '保守運用が膨らむ', condition: 'ログと監査を残す' },
             { conclusion: '既存業務の延長で可', reason: '現場の受入コストが低い', risk: '改善効果が見えにくい', condition: 'before/afterを定量比較' },
-            { conclusion: '予算内なら可', reason: 'コスト見積もりが現実的', risk: '隠れ運用コストが後から出る', condition: '半年後の再評価を予約' }
+            { conclusion: '予算内なら可', reason: 'コスト見積もりが現実的', risk: '隠れ運用コストが後から出る', condition: '半年後の再評価を予約' },
+            { conclusion: 'マニュアルがあれば可', reason: '誰でも動かせる手順が存在する', risk: 'マニュアルが陳腐化する', condition: '四半期ごとの内容更新を義務化' },
+            { conclusion: '引き継ぎ設計で可', reason: '担当交代でも継続できる構造がある', risk: '形式だけで実態が移らない', condition: '引き継ぎ演習を本番前に実施' },
+            { conclusion: 'ROIが見える', reason: 'コスト回収の時期と根拠が明確', risk: '前提変化で回収計画が崩れる', condition: 'ROI再計算のトリガー条件を定める' },
+            { conclusion: '自動テスト込みで可', reason: '品質担保の手順が組み込まれている', risk: 'テストが通っても本番で崩れる', condition: '本番同等環境でのテストを必須化' },
+            { conclusion: '監視体制があれば可', reason: '異常検知と対応フローが整っている', risk: '監視が形式的なアラートだけになる', condition: '月次でアラートの有効性を検証' }
         ],
         reject: [
             { conclusion: '運用責任が重すぎる', reason: '現場にしわ寄せが出る', risk: '止め時を失う', condition: 'KPIと撤退線を置く' },
             { conclusion: '本番投入は早い', reason: '担当者が見えない', risk: '障害時の責任が散る', condition: '責任者を固定する' },
             { conclusion: '段取り不足で否決', reason: '維持コストを甘く見ている', risk: '運用が属人化する', condition: '手順と監査を先に作る' },
             { conclusion: '現場が回らない', reason: '導入後の教育が計画にない', risk: '形骸化して放置される', condition: '教育計画と工数を先に確保' },
-            { conclusion: '撤退設計がない', reason: '止める手順が決まっていない', risk: 'サンクコストで続けてしまう', condition: '撤退判定日を事前に設定' }
+            { conclusion: '撤退設計がない', reason: '止める手順が決まっていない', risk: 'サンクコストで続けてしまう', condition: '撤退判定日を事前に設定' },
+            { conclusion: '属人化リスクが高い', reason: '特定人物の離脱で止まる構造になっている', risk: '退職と同時に運用が崩壊する', condition: '属人スキルを文書化してから進む' },
+            { conclusion: 'スケール不可能', reason: '成功しても拡大できない設計になっている', risk: '小さい成功が大きい失敗の種になる', condition: '拡大フェーズの設計を先に書く' },
+            { conclusion: '兼務では回らない', reason: '本業の負荷が増えれば即座に破綻する', risk: '担当者が黙って限界を超える', condition: '専任アサインか工数の明示を先に' },
+            { conclusion: '暫定運用は認めない', reason: '暫定が恒常化するパターンが見えている', risk: '技術的負債が静かに積み上がる', condition: '本番化の期限と条件を今決める' },
+            { conclusion: '手動は継続できない', reason: '量が増えると人手が追いつかなくなる', risk: 'ミスが増えても誰も止められない', condition: '自動化可能な範囲を先に設計' }
         ]
     }
 };
@@ -2405,6 +2435,10 @@ function showConsensus(consensus, mode) {
     minoritySummaryEl.textContent = consensus?.minorityView || LATENT_MINORITY_TEXT;
     renderList(holdConditionsEl, consensus?.holdConditions || [], '追加条件なし');
     actionPlanEl.textContent = consensus?.recommendedAction || '推奨アクションを生成できませんでした。';
+    // 審議回数をコンセンサスヘッダーに反映する（deliberationCount は showRedeliberateUi でインクリメントされるため、
+    // 初回は 0 + 1 = 第1回と表示する）
+    const roundLabel = `第${deliberationCount + 1}回審議`;
+    document.getElementById('csLabel').textContent = `▶▶ MAGI CONSENSUS RESULT ◀◀  ${roundLabel}`;
     document.getElementById('consensus').classList.add('show');
 }
 
