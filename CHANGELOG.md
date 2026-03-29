@@ -27,6 +27,10 @@
 - `scoreDemoPanel`, `createDemoPanel`, `rebalanceDemoPanels`, `buildDemoDeliberation` に `round`（審議回数）を渡すようにし、再審議時にスコアとテンプレート選択が変化するようにした
 - `scoreDemoPanel` の drift 係数を 0.9 → 1.2 に引き上げ、キーワードヒット差が小さい質問で結果が揺れやすくした
 
+### Fixed
+
+- `docs/HANDOFF.md` の「削除済み/公開サイトなし」を正確な記述に修正（旧 repo 削除済み + 現行公開 URL を明記）
+
 ### Verified
 
 - LOCAL AI: WebGPU 非対応環境で CDN 接続失敗 → DEMO フォールバックが正常に動作することを確認した
