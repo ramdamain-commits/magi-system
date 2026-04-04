@@ -1,4 +1,4 @@
-﻿# MAGI System Handoff
+# MAGI System Handoff
 
 最終更新: 2026-03-29
 
@@ -12,9 +12,23 @@
 - 入力ミスと通信失敗は `alert()` ではなく、画面上部バナーと inline エラーで案内する
 - 再審議ボタンと差分比較機能で、同じ問いを繰り返し審議してゲーム性を高められる
 - 良い問いテンプレ 8 件をクリック可能なチップとして UI に統合した
-- 現行の公開先: `https://ramdamain-commits.github.io/magi-system/`
-- 旧公開先（旧 repo `test-project`）は削除済み（旧 URL: `https://ramdamain-commits.github.io/test-project/`）
 - 文字コード運用は `.editorconfig` が source of truth。PR では `.github/workflows/text-encoding-check.yml` が `scripts/Test-TextEncoding.ps1 -Recurse -FailOnWarning` を実行する
+
+### 現行公開状態
+
+| リソース | URL | 状態 |
+|----------|-----|------|
+| GitHub Pages（現行） | `https://ramdamain-commits.github.io/magi-system/` | 公開中 |
+| GitHub repo | `https://github.com/ramdamain-commits/magi-system` | public |
+
+### 旧公開履歴
+
+| リソース | URL | 状態 |
+|----------|-----|------|
+| GitHub Pages（旧 repo `test-project`） | `https://ramdamain-commits.github.io/test-project/` | repo 削除に伴い消滅（404） |
+| GitHub repo（旧） | `https://github.com/ramdamain-commits/test-project` | 削除済み（404） |
+
+旧 repo `test-project` からの移行は完了しており、現行コードと公開サイトはすべて `magi-system` repo に集約されている。
 
 ## 2. いまの仕様の要点
 
@@ -114,12 +128,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-TextEncoding.
 # 状態確認
 git status --short --branch
 
-# 公開サイト
-# 現行公開先: https://ramdamain-commits.github.io/magi-system/
-# 旧公開先（旧 repo test-project）は削除済み
+# 公開サイト（現行）
+# https://ramdamain-commits.github.io/magi-system/
+# （旧 repo test-project は削除済み。詳細はセクション 1「現行公開状態」「旧公開履歴」を参照）
 ```
 
-## 8. 直近の履歴（旧 repo `test-project` 削除済み - 旧 PR リンクはアーカイブ参照）
+## 8. 直近の履歴
+
+> 旧 repo `test-project` の PR リンク（#8, #12, #14, #15, #16）は旧 repo 削除に伴いアクセス不可。内容はセクション 1「旧公開履歴」を参照。
 
 - 2026-03-29: DEMO キーワードルール調整・テンプレート拡充（3→5件）・再審議バリエーション追加。LOCAL AI フォールバック動作確認。Gemini API 実機テスト成功
 - 2026-03-26: `panels only` 契約整理（consensus 互換分岐削除）、ゲーム性強化（再審議・差分比較・テンプレチップ）、LOCAL AI 実験モード再導入を実装した
@@ -138,4 +154,4 @@ git status --short --branch
 - DEMO のキーワードルール・テンプレート改善、LOCAL AI フォールバック確認、Gemini API テストは完了済み
 - `LOCAL AI` は WebGPU 非対応環境でのフォールバック動作は確認済みだが、WebGPU 対応環境での推論品質は未検証
 - 実 API を流す場合は free tier の quota にすぐ当たるので、テスト回数を絞ること
-- 現行の公開先は `https://ramdamain-commits.github.io/magi-system/`。旧公開先（旧 repo `test-project`）は削除済み
+- 現行の公開先は `https://ramdamain-commits.github.io/magi-system/`（公開中）。旧 repo `test-project` の経緯はセクション 1「旧公開履歴」を参照

@@ -194,11 +194,9 @@
             transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
         .mode-card:hover .mode-card-body {
-            border-color: var(--amber);
-            transform: translateY(-1px);
-        }
             flex-direction: column;
             border-color: var(--amber);
+            transform: translateY(-1px);
             box-shadow: 0 0 18px rgba(255,170,0,.14);
         }
         .mode-card-title {
@@ -1422,6 +1420,16 @@ function getSelectedMode() {
     return document.querySelector('input[name="runMode"]:checked')?.value || 'demo';
 }
 
+
+function escapeHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function hashText(text) {
     let hash = 2166136261;
     const source = String(text || '');
@@ -2368,7 +2376,7 @@ function panelElements(key) {
 
 function clearConsensus() {
     document.getElementById('consensus').classList.remove('show');
-    document.getElementById('voteRow').innerHTML = '';
+    document.getElementById('voteRow').replaceChildren();
     document.getElementById('majoritySummary').textContent = '---';
     document.getElementById('minoritySummary').textContent = '---';
     document.getElementById('holdConditions').replaceChildren();
@@ -2666,30 +2674,30 @@ function buildDiffHtml(prev, curr) {
         // verdict change
         if (p.verdict !== c.verdict) {
             const flipClass = c.verdict === 'approve' ? 'to-approve' : 'to-reject';
-            rows += `<div class="diff-row"><span class="diff-changed">判定: ${verdictLabel(p.verdict)} → ${verdictLabel(c.verdict)}</span><span class="diff-verdict-flip ${flipClass}">${verdictLabel(c.verdict)}</span></div>`;
+            rows += `<div class="diff-row"><span class="diff-changed">判定: ${escapeHtml(verdictLabel(p.verdict))} → ${escapeHtml(verdictLabel(c.verdict))}</span><span class="diff-verdict-flip ${flipClass}">${escapeHtml(verdictLabel(c.verdict))}</span></div>`;
         } else {
-            rows += `<div class="diff-row"><span class="diff-same">判定: ${verdictLabel(c.verdict)}（変化なし）</span></div>`;
+            rows += `<div class="diff-row"><span class="diff-same">判定: ${escapeHtml(verdictLabel(c.verdict))}（変化なし）</span></div>`;
         }
 
         // conclusion change
         if (p.conclusion !== c.conclusion) {
-            rows += `<div class="diff-row"><span class="diff-changed">結論: ${p.conclusion} → ${c.conclusion}</span></div>`;
+            rows += `<div class="diff-row"><span class="diff-changed">結論: ${escapeHtml(p.conclusion)} → ${escapeHtml(c.conclusion)}</span></div>`;
         }
 
         // risk change
         if (p.risk !== c.risk) {
-            rows += `<div class="diff-row"><span class="diff-changed">リスク: ${p.risk} → ${c.risk}</span></div>`;
+            rows += `<div class="diff-row"><span class="diff-changed">リスク: ${escapeHtml(p.risk)} → ${escapeHtml(c.risk)}</span></div>`;
         }
 
         // reasons change
         const prevReason = (p.reasons || [])[0] || '';
         const currReason = (c.reasons || [])[0] || '';
         if (prevReason !== currReason) {
-            rows += `<div class="diff-row"><span class="diff-changed">理由: ${prevReason} → ${currReason}</span></div>`;
+            rows += `<div class="diff-row"><span class="diff-changed">理由: ${escapeHtml(prevReason)} → ${escapeHtml(currReason)}</span></div>`;
         }
 
         if (rows) {
-            parts.push(`<div class="diff-panel"><div class="diff-panel-name ${key}">${meta.name}</div>${rows}</div>`);
+            parts.push(`<div class="diff-panel"><div class="diff-panel-name ${key}">${escapeHtml(meta.name)}</div>${rows}</div>`);
         }
     });
     return parts.join('');
@@ -2708,7 +2716,7 @@ function updateDiffSection(currentPanels, currentConsensus) {
                 const prevOutcome = previousConsensus.outcome?.finalText || '';
                 const currOutcome = currentConsensus.outcome?.finalText || '';
                 if (prevOutcome !== currOutcome) {
-                    consensusDiff = `<div class="diff-panel"><div class="diff-panel-name" style="color:var(--amber)">CONSENSUS</div><div class="diff-row"><span class="diff-changed">最終判定: ${prevOutcome} → ${currOutcome}</span></div></div>`;
+                    consensusDiff = `<div class="diff-panel"><div class="diff-panel-name" style="color:var(--amber)">CONSENSUS</div><div class="diff-row"><span class="diff-changed">最終判定: ${escapeHtml(prevOutcome)} → ${escapeHtml(currOutcome)}</span></div></div>`;
                 }
             }
             diffBody.innerHTML = html + consensusDiff;
