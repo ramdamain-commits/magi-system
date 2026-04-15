@@ -1,4 +1,14 @@
-﻿# Changelog
+# Changelog
+
+## 2026-04-05
+
+### Changed
+
+- レイアウト崩れを修正 — max-width 制限・カード3列化・余白調整 (3667f89)
+
+### Fixed
+
+- XSS 脆弱性対策・CSS バグ修正・HANDOFF 整理 (3464fc7)
 
 ## 2026-03-29
 
